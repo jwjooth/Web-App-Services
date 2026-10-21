@@ -1,0 +1,21 @@
+# Decisions
+
+- Keep the existing Vite preview untouched and place the requested Go and Next.js applications in `backend/` and `frontend/`; this preserves host tooling without substituting Vite for the requested stack.
+- Use PostgreSQL 17 with SQL-only migrations; a stable supported database release is sufficient for this MVP.
+- Use BIGINT minor-unit money and identity IDs; integer arithmetic avoids floating-point rounding and requires no UUID dependency.
+- Start name search with the requested plain B-tree index; a trigram extension needs measured search performance to justify it.
+- Product foreign keys restrict deletion after purchase; order snapshots remain auditable and products can instead be deactivated.
+- Health checks ping PostgreSQL with a two-second deadline; a live HTTP process alone does not establish readiness. A successful ping is reused for five seconds so probes do not hit the database every time; a failure is never cached, so recovery is seen at once.
+- The database error is logged before the generic 503 response; the client never sees the internal reason.
+- No JWT secret is required before authentication exists. The setting comes back with the auth milestone, together with a check that rejects the example placeholder.
+- `POSTGRES_PASSWORD` in `.env` is the only password. The Makefile and `compose.yaml` build `DATABASE_URL` from it, so the two can no longer drift apart.
+- Use a cryptographically generated request ID rather than a client-supplied ID; untrusted headers cannot inject identifiers into logs.
+- PostgreSQL is reached through `pgx` and the standard `database/sql` pool. No ORM is used yet; one is only worth adding when there are models and queries to map.
+- Routing uses the standard library `net/http` router, which handles paths and methods, so no third-party router is needed.
+- Dependency wiring is written by hand. Wire is archived upstream and the wiring was three providers, so the generator and its CLI were removed.
+- The API rejects requests from any browser origin except `FRONTEND_ORIGIN`, and the same rule is documented in the code as the limit of the current single-frontend setup.
+- `users.email` is stored lowercase (enforced by a check constraint). Login must lowercase the input before comparing, or a user typing `User@Example.com` is told the account does not exist.
+- One product may appear only once per order (`order_items` has a unique index on order and product), so a checkout that changes a quantity updates the line instead of adding a second one.
+- Local environment values are loaded by Make, not an extra dotenv dependency; `.env.example` contains placeholders only.
+- Pin development CLI versions, including golangci-lint 2.15.0; reproducible gates should not drift with upstream releases.
+- The backend ships as a container image (`backend/Dockerfile`) and runs next to the database in `compose.yaml`; migrations stay a separate, manual step.
