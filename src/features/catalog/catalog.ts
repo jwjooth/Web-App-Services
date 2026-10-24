@@ -1,0 +1,27 @@
+export type Product = { id: number; name: string; price: number; original: number; image: string; category: string; rating: string; sold: string; city: string; tag?: string };
+const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=85`;
+export const categories = [
+  { name: "For you", icon: "grid" },
+  { name: "Electronics", icon: "laptop" },
+  { name: "Fashion", icon: "shirt" },
+  { name: "Home & Living", icon: "home" },
+  { name: "Beauty & Care", icon: "beauty" },
+  { name: "Sports & Outdoor", icon: "sport" },
+  { name: "Food & Groceries", icon: "bag" },
+  { name: "Toys & Hobbies", icon: "gift" },
+];
+export const products: Product[] = [
+  { id: 1, name: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones", price: 3499000, original: 4999000, image: photo("photo-1546435770-a3e426bf472b"), category: "Electronics", rating: "4.9", sold: "1.2k", city: "Jakarta Selatan", tag: "Official store" },
+  { id: 2, name: "Nike Air Max 270 Everyday Comfort Sneakers", price: 1299000, original: 1899000, image: photo("photo-1542291026-7eec264c27ff"), category: "Fashion", rating: "4.9", sold: "850", city: "Jakarta Pusat", tag: "Official store" },
+  { id: 3, name: "Minimalist Ceramic Mug — Everyday Collection", price: 89000, original: 149000, image: photo("photo-1514228742587-6b1558fcca3d"), category: "Home & Living", rating: "4.8", sold: "2.1k", city: "Bandung", tag: "Best seller" },
+  { id: 4, name: "The Ordinary Niacinamide 10% + Zinc 1% Serum", price: 125000, original: 185000, image: photo("photo-1608248543803-ba4f8c70ae0b"), category: "Beauty & Care", rating: "4.9", sold: "3.5k", city: "Jakarta Barat", tag: "Official store" },
+  { id: 5, name: "Amazfit GTR 4 Smartwatch — Superspeed Black", price: 2199000, original: 2999000, image: photo("photo-1523275335684-37898b6baf30"), category: "Electronics", rating: "4.8", sold: "620", city: "Tangerang", tag: "Official store" },
+  { id: 6, name: "Everyday Canvas Tote Bag — Natural Cream", price: 79000, original: 129000, image: photo("photo-1553062407-98eeb64c6a62"), category: "Fashion", rating: "4.9", sold: "1.8k", city: "Yogyakarta", tag: "Best seller" },
+  { id: 7, name: "Marshall Major IV Wireless Headphones", price: 1899000, original: 2499000, image: photo("photo-1484704849700-f032a568e944"), category: "Electronics", rating: "4.9", sold: "720", city: "Jakarta Selatan" },
+  { id: 8, name: "Premium Indoor Plant with Ceramic Pot", price: 159000, original: 229000, image: photo("photo-1485955900006-10f4d324d411"), category: "Home & Living", rating: "4.8", sold: "940", city: "Bandung" },
+  { id: 9, name: "Adidas Everyday Running Shoes", price: 899000, original: 1299000, image: photo("photo-1600185365926-3a2ce3cdb9eb"), category: "Sports & Outdoor", rating: "4.9", sold: "430", city: "Surabaya" },
+  { id: 10, name: "Premium Specialty Coffee — Fresh Roasted 250g", price: 95000, original: 125000, image: photo("photo-1447933601403-0c6688de566e"), category: "Food & Groceries", rating: "4.9", sold: "1.1k", city: "Bandung" },
+  { id: 11, name: "Retro Instant Camera — Capture Every Moment", price: 1199000, original: 1499000, image: photo("photo-1516035069371-29a1b244cc32"), category: "Toys & Hobbies", rating: "4.8", sold: "280", city: "Jakarta Pusat" },
+  { id: 12, name: "Daily Moisturizer — Hydrating Skin Essentials", price: 149000, original: 199000, image: photo("photo-1556229010-6c3f2c9ca5f8"), category: "Beauty & Care", rating: "4.8", sold: "890", city: "Tangerang" },
+];
+export const currency = (value: number) => `Rp${value.toLocaleString("id-ID")}`;

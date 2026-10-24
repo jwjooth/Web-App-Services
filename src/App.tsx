@@ -1,11 +1,87 @@
+import { useEffect, useState } from "react";
+import Icon from "./components/Icon";
+import { categories, currency, products, type Product } from "./features/catalog/catalog";
+import useCart from "./features/cart/useCart";
+import ServicePages, { type ServicePage } from "./features/ServicePages";
+
 export default function App() {
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-2 p-8 text-center">
-      <h1 className="text-2xl font-semibold">Shop MVP</h1>
-      <p className="text-neutral-600">
-        The storefront is not built yet. The Go API runs on port 8080.
-      </p>
-      <p className="text-neutral-400 text-sm">See README.md for how to run it.</p>
-    </main>
-  )
+  const [page, setPage] = useState<ServicePage>("shop");
+  const [category, setCategory] = useState("For you");
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState("For you");
+  const [saved, setSaved] = useState<number[]>([]);
+  const [showSaved, setShowSaved] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [selected, setSelected] = useState<Product | null>(null);
+  const [notice, setNotice] = useState("");
+  const [seconds, setSeconds] = useState(3 * 3600 + 42 * 60 + 18);
+  const [banner, setBanner] = useState(0);
+  const cart = useCart();
+  useEffect(() => { const id = setInterval(() => setSeconds(s => Math.max(0, s - 1)), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => { if (notice) { const id = setTimeout(() => setNotice(""), 3500); return () => clearTimeout(id); } }, [notice]);
+  const filtered = products.filter(p => (category === "For you" || p.category === category) && p.name.toLowerCase().includes(query.toLowerCase()) && (!showSaved || saved.includes(p.id)));
+  const recommended = tab === "Best sellers" ? [...filtered].sort((a, b) => Number.parseFloat(b.sold) - Number.parseFloat(a.sold)) : tab === "Under Rp100k" ? filtered.filter(p => p.price < 100000) : tab === "New arrivals" ? [...filtered].reverse() : filtered;
+  function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(i => i !== id) : [...s, id]); }
+  function addToCart(p: Product) { cart.add(p); setNotice(`${p.name.split(" — ")[0]} added to your cart`); }
+  function navigate(next: ServicePage) { setPage(next); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function openShopSection(id: string) { setPage("shop"); requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })); }
+  const card = (p: Product, flash = false) => <article className="product-card" key={p.id}>
+    <div className="product-image" onClick={() => setSelected(p)}>
+      <img src={p.image} alt={p.name} loading="lazy" />
+      {flash && <span className="discount">{Math.round((1 - p.price / p.original) * 100)}% OFF</span>}
+      <button className={`save-button ${saved.includes(p.id) ? "saved" : ""}`} aria-label={`Save ${p.name}`} onClick={e => { e.stopPropagation(); toggleSaved(p.id); }}><Icon name="heart" size={17} /></button>
+      <button className="quick-add" onClick={e => { e.stopPropagation(); addToCart(p); }}><Icon name="plus" size={16} /> Add to cart</button>
+    </div>
+    <div className="product-info">
+      <span className={`store-label ${p.tag === "Best seller" ? "bestseller" : ""}`}><Icon name={p.tag === "Best seller" ? "bolt" : "shield"} size={11} />{p.tag || "Verified seller"}</span>
+      <button className="product-name" onClick={() => setSelected(p)}>{p.name}</button>
+      <strong className="price">{currency(p.price)}</strong>
+      <div className="original-price"><del>{currency(p.original)}</del><span>{Math.round((1 - p.price / p.original) * 100)}%</span></div>
+      <div className="rating"><span className="star">★</span> {p.rating}<span className="separator">|</span><span>{p.sold} sold</span></div>
+      {flash ? <div className="stock"><div><span style={{ width: `${35 + p.id * 7}%` }} /></div><span>Selling fast</span></div> : <div className="product-city"><Icon name="pin" size={12} />{p.city}</div>}
+    </div>
+  </article>;
+  return <div className="app">
+    <div className="utility-bar"><div><span><Icon name="phone" size={13} /> Get the pasar app</span><span className="utility-divider" /><span>Your everyday finds, a little better.</span></div><div><button onClick={() => setNotice("Seller onboarding is coming soon.")}>Become a seller</button><button onClick={() => setNotice("Need help? Contact hello@pasar.example")}>Help center</button><button onClick={() => setNotice("Language is set to English. Prices are in Indonesian rupiah.")}>English <Icon name="down" size={12} /></button></div></div>
+    <header className="main-header">
+      <a className="logo" href="#" onClick={() => { navigate("shop"); setCategory("For you"); setQuery(""); setShowSaved(false); }}>pasar<span>.</span><span className="logo-mark"><Icon name="bag" size={21} /></span></a>
+      <div className="search-area"><div className="search-box"><Icon name="search" size={21} /><input aria-label="Search products" value={query} onChange={e => { setPage("shop"); setQuery(e.target.value); }} placeholder="Search for anything you love..." /><kbd>/</kbd><button aria-label="Search" onClick={() => openShopSection("discover")}><Icon name="search" size={19} /></button></div><div className="trending-searches"><span>Trending:</span>{["Wireless earbuds", "Running shoes", "Skincare", "Home essentials"].map(term => <button key={term} onClick={() => { setPage("shop"); setQuery(term === "Wireless earbuds" ? "Wireless" : term === "Skincare" ? "Serum" : term === "Home essentials" ? "Ceramic" : "Running"); }}>{term}</button>)}</div></div>
+      <div className="header-actions"><button className={showSaved ? "active" : ""} aria-label="Saved products" onClick={() => { navigate("shop"); setShowSaved(!showSaved); setCategory("For you"); }}><Icon name="heart" size={23} />{saved.length > 0 && <b>{saved.length}</b>}</button><button aria-label="Notifications" onClick={() => setNotice("You're all caught up. New deals arrive every day!")}><Icon name="bell" size={23} /><i /></button><button aria-label="Open cart" onClick={() => setCartOpen(true)}><Icon name="cart" size={24} />{cart.count > 0 && <b>{cart.count}</b>}</button><span className="header-divider" /><button className="profile" onClick={() => navigate("user")}><span>A</span><div>Hi, Alex<small>Happy shopping!</small></div><Icon name="down" size={14} /></button></div>
+    </header>
+    <nav className="service-navigation" aria-label="Marketplace sections">
+      <div>{([{ id: "shop", label: "Discover", icon: "grid" }, { id: "products", label: "Products", icon: "bag" }, { id: "orders", label: "My orders", icon: "truck" }, { id: "user", label: "My account", icon: "shield" }] as const).map(item => <button key={item.id} className={page === item.id ? "active" : ""} aria-current={page === item.id ? "page" : undefined} onClick={() => navigate(item.id)}><Icon name={item.icon} size={17} />{item.label}{item.id === "orders" && <span>4</span>}</button>)}</div><span>Your everyday, connected.</span>
+    </nav>
+    <div className="page-shell">
+      <aside className="sidebar">
+        <div className="deliver"><span className="pin-box"><Icon name="pin" size={20} /></span><div><small>Deliver to</small><button onClick={() => setNotice("Delivery preview: Jakarta, 12310. Address selection will connect to your shipping service.")}>Jakarta, 12310 <Icon name="down" size={13} /></button></div></div>
+        <div className="sidebar-title">EXPLORE MARKETPLACE</div>
+        <nav>{categories.map(c => <button key={c.name} className={category === c.name && !showSaved ? "selected" : ""} onClick={() => { navigate("shop"); setCategory(c.name); setShowSaved(false); setQuery(""); }}><Icon name={c.icon} size={20} />{c.name}{c.name !== "For you" && <Icon name="chevron" size={13} />}</button>)}</nav>
+        <div className="sidebar-line" />
+        <nav><button onClick={() => openShopSection("flash-sale")}><Icon name="bolt" /><span>Flash deals</span><span className="hot">HOT</span></button><button onClick={() => { setTab("Best sellers"); openShopSection("discover"); }}><Icon name="shield" />Official stores<Icon name="chevron" size={13} /></button><button onClick={() => setNotice("Use code HELLOPASAR for 10% off your first order. Demo offer only.")}><Icon name="gift" />Vouchers & offers</button></nav>
+        <div className="seller-promo"><span className="seller-icon"><Icon name="bag" size={22} /></span><h3>Your next big thing<br />starts here.</h3><p>Open your shop and reach<br />millions of happy shoppers.</p><button onClick={() => setNotice("Seller registration will be available when your seller service is connected.")}>Start selling <Icon name="arrow" size={15} /></button></div>
+        <button className="need-help" onClick={() => setNotice("We're here to help. Contact hello@pasar.example")}><Icon name="help" size={18} />Need a little help?<Icon name="arrow" size={15} /></button>
+      </aside>
+      <main className={page !== "shop" ? "services-main" : ""}>
+        {page !== "shop" && <ServicePages page={page} onProduct={setSelected} onAdd={addToCart} notify={setNotice} />}
+        <div hidden={page !== "shop"}>
+        <div className="breadcrumb">Home <Icon name="chevron" size={12} /><span>{showSaved ? "Your saved finds" : category === "For you" ? "Discover" : category}</span><span className="welcome">A little something for everyone.</span></div>
+        <section className="promotions">
+          <div className={`hero hero-${banner}`}>
+            <div className="hero-copy"><span className="eyebrow"><span /> THE EVERYDAY UPGRADE</span><h1>{banner === 0 ? <>Little upgrades.<br />Big happy energy.</> : banner === 1 ? <>Good sound.<br />Great everyday.</> : <>Find your thing.<br />Love every day.</>}</h1><p>Your favorite brands. Fresh finds. Better prices.<br />Make room for your next favorite thing.</p><button onClick={() => { setCategory("Electronics"); openShopSection("discover"); }}>Explore the collection <Icon name="arrow" size={17} /></button><div className="hero-dots">{[0, 1, 2].map(i => <button key={i} aria-label={`Promotion ${i + 1}`} className={banner === i ? "current" : ""} onClick={() => setBanner(i)} />)}</div></div>
+            <div className="hero-visual"><div className="hero-circle" /><span className="hero-spark spark-one">✳</span><span className="hero-spark spark-two">✳</span><img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=90" alt="Premium over-ear headphones" /><div className="floating-label"><span>GOOD FINDS, GREAT PRICES</span><strong>Up to <b>50% off</b></strong></div><span className="hero-footnote">A sound decision, if you ask us.</span></div>
+          </div>
+          <div className="side-promos"><div className="shipping-promo"><div className="promo-top">LESS SHIPPING. MORE SHOPPING.<Icon name="truck" size={30} /></div><h2>Good things.<br />Free delivery.</h2><p>On your first 3 orders. Just because.</p><button onClick={() => setNotice("Free delivery voucher claimed! Applies to your first 3 orders once checkout is connected.")}>Claim your perk <Icon name="arrow" size={16} /></button><div className="delivery-seal">FREE<br /><b>DELIVERY</b></div></div><div className="new-promo"><div><span>NEW HERE? NICE TO MEET YOU.</span><h3>A little welcome gift.</h3><p>Enjoy 10% off your first order.</p><button onClick={() => { navigator.clipboard?.writeText("HELLOPASAR"); setNotice("Welcome code HELLOPASAR copied. Demo offer only."); }}>Get my voucher <Icon name="arrow" size={14} /></button></div><Icon name="gift" size={56} /></div></div>
+        </section>
+        <section className="trust-strip">{[{ icon: "shield", title: "100% authentic", text: "Real brands. Real peace of mind." }, { icon: "truck", title: "Free delivery", text: "More joy, less shipping fees." }, { icon: "bag", title: "Shop with confidence", text: "Secure payments, always." }, { icon: "headphones", title: "Here for you", text: "A little help, whenever you need." }].map(item => <div key={item.title}><span><Icon name={item.icon} size={24} /></span><div><strong>{item.title}</strong><p>{item.text}</p></div></div>)}</section>
+        <section className="category-section"><div className="section-heading"><div><h2>What are you looking for?</h2><p>A world of good finds, one category away.</p></div><button className="text-link" onClick={() => { setCategory("For you"); openShopSection("discover"); }}>View all categories <Icon name="arrow" size={16} /></button></div><div className="category-grid">{categories.slice(1).concat([{ name: "More categories", icon: "grid" }]).map((c, i) => <button key={c.name} onClick={() => { setCategory(c.name === "More categories" ? "For you" : c.name); setShowSaved(false); openShopSection("discover"); }}><span className={`category-icon category-color-${i}`}><Icon name={c.icon} size={30} /></span><span>{c.name}</span></button>)}</div></section>
+        <section className="flash-section" id="flash-sale"><div className="section-heading"><div className="flash-heading"><span className="flash-bolt"><Icon name="bolt" size={26} /></span><div><h2>Good deals. Gone soon.</h2><p>Your favorites, at blink-and-you-miss-it prices.</p></div><div className="countdown"><span>Ends in</span>{[Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map((n, i) => <span className="time-part" key={i}><b>{String(n).padStart(2, "0")}</b>{i < 2 && <i>:</i>}</span>)}</div></div><button className="text-link" onClick={() => { setTab("Best sellers"); openShopSection("discover"); }}>All flash deals <Icon name="arrow" size={16} /></button></div><div className="product-grid flash-grid">{products.slice(0, 6).map(p => card(p, true))}</div></section>
+        <section className="discover-section" id="discover"><div className="section-heading"><div><h2>{showSaved ? "Your saved finds" : query ? `Results for “${query}”` : category !== "For you" ? category : "Made for your kind of everyday."}</h2><p>{showSaved ? "All the things you've had your eye on." : "A few things we think you'll love. And a few happy surprises."}</p></div><span className="curated"><Icon name="grid" size={15} /> Curated for you</span></div><div className="tabs">{["For you", "Best sellers", "New arrivals", "Under Rp100k"].map(t => <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t}</button>)}</div><div className="product-grid">{recommended.map(p => card(p))}</div>{recommended.length === 0 && <div className="empty-state"><Icon name="search" size={35} /><h3>No finds just yet</h3><p>Try a different search or explore another category.</p><button onClick={() => { setQuery(""); setCategory("For you"); setTab("For you"); setShowSaved(false); }}>Explore all products</button></div>}</section>
+        </div>
+        <footer><a className="logo" href="#" onClick={() => navigate("shop")}>pasar<span>.</span></a><p>A little discovery. A lot to love.</p><span>© 2026 pasar. Your everyday marketplace.</span></footer>
+      </main>
+    </div>
+    {notice && <div className="toast" role="status"><Icon name="shield" size={20} />{notice}<button aria-label="Dismiss" onClick={() => setNotice("")}><Icon name="close" size={16} /></button></div>}
+    {cartOpen && <div className="overlay" onClick={() => setCartOpen(false)}><section className="cart-drawer" onClick={e => e.stopPropagation()}><div className="modal-heading"><h2>Your happy little cart <span>({cart.count})</span></h2><button aria-label="Close cart" onClick={() => setCartOpen(false)}><Icon name="close" /></button></div>{cart.items.length === 0 ? <div className="empty-state"><Icon name="cart" size={44} /><h3>Good finds are waiting.</h3><p>Your cart is empty. Let's change that.</p><button onClick={() => setCartOpen(false)}>Keep exploring</button></div> : <><div className="cart-items">{cart.items.map(({ product, quantity }) => <div className="cart-item" key={product.id}><img src={product.image} alt={product.name} /><div><h3>{product.name}</h3><strong>{currency(product.price)}</strong><div className="quantity"><button aria-label="Decrease quantity" onClick={() => cart.change(product.id, -1)}><Icon name="minus" size={14} /></button><span>{quantity}</span><button aria-label="Increase quantity" onClick={() => cart.change(product.id, 1)}><Icon name="plus" size={14} /></button></div></div></div>)}</div><div className="cart-summary"><div><span>Subtotal</span><strong>{currency(cart.total)}</strong></div><p>Shipping and vouchers calculated at checkout.</p><button className="primary-button" onClick={() => setNotice("This is a frontend demo. Checkout requires your external order and payment APIs.")}>Continue to checkout <Icon name="arrow" size={18} /></button><span className="secure-note"><Icon name="shield" size={14} />Safe finds. Secure shopping.</span></div></>}</section></div>}
+    {selected && <div className="overlay product-overlay" onClick={() => setSelected(null)}><section className="detail-modal" onClick={e => e.stopPropagation()}><button className="modal-close" aria-label="Close product" onClick={() => setSelected(null)}><Icon name="close" /></button><img src={selected.image} alt={selected.name} /><div className="detail-copy"><span className="store-label"><Icon name="shield" size={13} />{selected.tag || "Verified seller"}</span><h2>{selected.name}</h2><div className="rating"><span className="star">★</span>{selected.rating}<span className="separator">|</span>{selected.sold} sold</div><strong className="detail-price">{currency(selected.price)}</strong><del>{currency(selected.original)}</del><p>A good find for your everyday. Quality you can count on, from a seller you can trust.</p><div className="detail-perks"><span><Icon name="truck" size={18} />Free delivery on your first order</span><span><Icon name="shield" size={18} />Authenticity guaranteed</span></div><button className="primary-button" onClick={() => addToCart(selected)}><Icon name="cart" size={19} />Add to cart</button><button className="detail-save" onClick={() => toggleSaved(selected.id)}><Icon name="heart" size={18} />{saved.includes(selected.id) ? "Saved to your favorites" : "Save for a little later"}</button></div></section></div>}
+  </div>;
 }
