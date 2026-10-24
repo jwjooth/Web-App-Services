@@ -1,43 +1,44 @@
 # figma-make-app
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+Two concerns share this repo:
 
-## Development Server
+1. Root Vite + React + Tailwind scaffold — Figma Make host preview (preserved, not the MVP frontend).
+2. `backend/` — Go Milestone 1 skeleton (Go, Wire DI, SQL migrations, PostgreSQL; DB verification blocked by Docker Hub rate limit).
 
-A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+## Root: Vite frontend (React 19, Tailwind v4, Vite 8)
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
-
-## Project Structure
-
-This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
-
-- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
-- `src/App.tsx` - Primary application component and the usual starting point for UI work
-- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
-- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
-- `.mise.toml` - Toolchain versions for Node.js and pnpm
-
-## Dependencies
-
-- Runtime: React 19 and React DOM 19
-- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
-- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
-- Formatting: oxfmt
-
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-Tailwind emits utility classes in `@layer utilities`, and CSS outside any cascade layer overrides every layer regardless of specificity. Put global element styles, such as resets and defaults for `body`, headings, `button`, or `input`, inside `@layer base { ... }` so utility classes on those elements still apply. Tailwind's Preflight already applies `box-sizing: border-box`, removes default margins, and sets `font: inherit` on form controls, so do not repeat those rules.
-
-## Code quality
-
-- Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
-- Ensure JSX tags are closed and braces are balanced.
+- Dev server runs on `$PORT` (default 8443), host `0.0.0.0`, `strictPort: true`. It is managed by Figma Make; don't add a separate start script.
+- Scripts (run with bun): `bun run dev`, `bun run build`, `bun run preview`, `bun run format`. Install deps with `bun install`.
+- Entry: `src/main.tsx` mounts `src/App.tsx` into `#root` in `index.html`; imports `src/index.css`.
+- Alias: `@` → `src` (vite.config.ts, tsconfig.json).
+- Global CSS/Tailwind v4 theme customization goes in `src/index.css`; `@import 'tailwindcss';` must stay first. Put element resets in `@layer base`.
 - Export components as default exports.
+- No test runner configured for the frontend.
+
+## Backend: Go app (`backend/`)
+
+Go 1.27, Docker Compose, Make, and Go's bin directory on `PATH` are required. Install dev CLIs with `make tools` (wire, migrate, golangci-lint).
+
+Setup order:
+1. `cp .env.example .env` — replace password/JWT placeholders; keep `DATABASE_URL` password consistent.
+2. `make tools`
+3. `docker compose up -d --wait` (PostgreSQL 17 on `127.0.0.1:5432`)
+4. `make migrate` (migrations never run automatically; GORM AutoMigrate is not used)
+5. `make run` — API on `:8080`; `GET /api/v1/healthz` returns `{"status":"ok"}` or HTTP 503 when DB is unreachable.
+
+Commands:
+- `make gate` — gofmt, go vet, golangci-lint, `go test ./...`, `go build ./...` (then verifies no gofmt diff).
+- `make wire` — regenerate DI after changing providers in `backend/cmd/api`; generated wiring is committed.
+- `make migrate-down` — roll back one migration (destructive, dev only).
+- `make fmt` / `make vet` / `make lint` / `make test` / `make build` / `make run` individually.
+
+Backend layout: `backend/cmd/api` (entrypoint), `backend/internal/{config,handler,repository,server}`, `backend/migrations/`. Wire providers live in `backend/cmd/api`.
+
+Gotchas:
+- Docker Hub rejects `postgres:17-alpine` pulls (anonymous rate limit) — live DB verification is blocked until the image is preloaded or access is restored.
+- `.env` is gitignored; `.env.example` has placeholders only. Make loads `.env` and exports it.
+- `make gate` requires all Make tools installed first.
+
+## Precedence
+
+`CLAUDE.md` just references this file (`@AGENTS.md`). If docs conflict with the Makefile or `package.json` scripts, trust the executable config.
