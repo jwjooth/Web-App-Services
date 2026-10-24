@@ -20,6 +20,7 @@ Two concerns share this repo:
 Go 1.27, Docker Compose, Make, and Go's bin directory on `PATH` are required. Install dev CLIs with `make tools` (wire, migrate, golangci-lint).
 
 Setup order:
+
 1. `cp .env.example .env` — replace password/JWT placeholders; keep `DATABASE_URL` password consistent.
 2. `make tools`
 3. `docker compose up -d --wait` (PostgreSQL 17 on `127.0.0.1:5432`)
@@ -27,6 +28,7 @@ Setup order:
 5. `make run` — API on `:8080`; `GET /api/v1/healthz` returns `{"status":"ok"}` or HTTP 503 when DB is unreachable.
 
 Commands:
+
 - `make gate` — gofmt, go vet, golangci-lint, `go test ./...`, `go build ./...` (then verifies no gofmt diff).
 - `make wire` — regenerate DI after changing providers in `backend/cmd/api`; generated wiring is committed.
 - `make migrate-down` — roll back one migration (destructive, dev only).
@@ -35,6 +37,7 @@ Commands:
 Backend layout: `backend/cmd/api` (entrypoint), `backend/internal/{config,handler,repository,server}`, `backend/migrations/`. Wire providers live in `backend/cmd/api`.
 
 Gotchas:
+
 - Docker Hub rejects `postgres:17-alpine` pulls (anonymous rate limit) — live DB verification is blocked until the image is preloaded or access is restored.
 - `.env` is gitignored; `.env.example` has placeholders only. Make loads `.env` and exports it.
 - `make gate` requires all Make tools installed first.

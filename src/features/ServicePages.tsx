@@ -5,7 +5,12 @@ import { demoOrders, type Order, type OrderStatus } from "./orders/orders";
 import { demoAddresses, demoUser, type Address } from "./user/user";
 
 export type ServicePage = "shop" | "products" | "orders" | "user";
-type Props = { page: Exclude<ServicePage, "shop">; onProduct: (product: Product) => void; onAdd: (product: Product) => void; notify: (message: string) => void };
+type Props = {
+  page: Exclude<ServicePage, "shop">;
+  onProduct: (product: Product) => void;
+  onAdd: (product: Product) => void;
+  notify: (message: string) => void;
+};
 export default function ServicePages({ page, onProduct, onAdd, notify }: Props) {
   const [orders, setOrders] = useState(demoOrders);
   const [orderFilter, setOrderFilter] = useState("All orders");
@@ -20,28 +25,693 @@ export default function ServicePages({ page, onProduct, onAdd, notify }: Props) 
   const [addresses, setAddresses] = useState(demoAddresses);
   const [defaultAddress, setDefaultAddress] = useState(1);
   const [addressDraft, setAddressDraft] = useState<Address | null>(null);
-  const [preferences, setPreferences] = useState({ orders: true, offers: false, recommendations: true });
+  const [preferences, setPreferences] = useState({
+    orders: true,
+    offers: false,
+    recommendations: true,
+  });
   const statuses: OrderStatus[] = ["To pay", "Processing", "In transit", "Delivered", "Cancelled"];
-  const visibleOrders = orders.filter(o => (orderFilter === "All orders" || o.status === orderFilter) && `${o.id} ${o.product.name}`.toLowerCase().includes(search.toLowerCase()));
-  const catalog = products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()) && (category === "All categories" || p.category === category)).sort((a, b) => sort === "Price: low to high" ? a.price - b.price : sort === "Price: high to low" ? b.price - a.price : a.id - b.id);
-  const titles = { orders: ["Your orders, all together.", "From checkout to your doorstep. Follow every little delivery."], products: ["Find your next favorite.", "Explore the catalog. Compare good finds. Make it yours."], user: ["A little space for you.", "Your details, delivery addresses, and everyday preferences."] };
-  return <div className="service-page">
-    <div className="service-title"><div><span className="service-eyebrow">YOUR PASAR / {page === "user" ? "ACCOUNT" : page.toUpperCase()}</span><h1>{titles[page][0]}</h1><p>{titles[page][1]}</p></div><span className="demo-pill"><span />Demo data · Backend coming soon</span></div>
-    {page === "orders" && <>
-      <div className="service-stats">{[{ label: "All orders", value: orders.length, icon: "bag" }, { label: "On their way", value: orders.filter(o => o.status === "In transit").length, icon: "truck" }, { label: "To pay", value: orders.filter(o => o.status === "To pay").length, icon: "cart" }, { label: "Delivered", value: orders.filter(o => o.status === "Delivered").length, icon: "shield" }].map(s => <div key={s.label}><span className="stat-icon"><Icon name={s.icon} size={23} /></span><div><span>{s.label}</span><strong>{s.value.toString().padStart(2, "0")}</strong></div></div>)}</div>
-      <div className="service-panel"><div className="service-panel-top"><h2>Order history</h2><label className="service-search"><Icon name="search" size={17} /><input aria-label="Search orders" placeholder="Search order or product" value={search} onChange={e => setSearch(e.target.value)} /></label></div><div className="order-tabs">{["All orders", ...statuses].map(s => <button key={s} className={orderFilter === s ? "active" : ""} onClick={() => setOrderFilter(s)}>{s}<span>{s === "All orders" ? orders.length : orders.filter(o => o.status === s).length}</span></button>)}</div>
-        <div className="order-list">{visibleOrders.map(order => <article className="order-card" key={order.id}><div className="order-top"><span><Icon name="bag" size={15} /><strong>{order.id}</strong><span className="order-date">{order.date}</span></span><span className={`status-badge status-${order.status.toLowerCase().replaceAll(" ", "-")}`}>{order.status}</span></div><div className="order-product"><button onClick={() => onProduct(order.product)}><img src={order.product.image} alt={order.product.name} /></button><div><span className="store-label"><Icon name="shield" size={11} />{order.product.tag || "Verified seller"}</span><button className="order-product-name" onClick={() => onProduct(order.product)}>{order.product.name}</button><p>Quantity: {order.quantity} <span>·</span> {currency(order.product.price)} each</p></div><div className="order-total"><small>Order total</small><strong>{currency(order.product.price * order.quantity)}</strong></div></div><div className="order-bottom"><span><Icon name={order.status === "Delivered" ? "shield" : "truck"} size={16} />{order.status === "Cancelled" ? "Cancelled in this demo session" : order.delivery}</span><div>{order.status === "To pay" && <button className="service-outline" onClick={() => { setOrders(current => current.map(o => o.id === order.id ? { ...o, status: "Cancelled" } : o)); notify("Order cancelled locally for this demo. No backend request was sent."); }}>Cancel order</button>}{order.status === "Delivered" ? <button className="service-solid" onClick={() => onAdd(order.product)}>Buy again <Icon name="plus" size={14} /></button> : <button className="service-solid" onClick={() => setTracking(order)}>{order.status === "In transit" ? "Track order" : "View details"}<Icon name="arrow" size={14} /></button>}</div></div></article>)}</div>
-        {visibleOrders.length === 0 && <div className="empty-state"><Icon name="bag" size={32} /><h3>No orders here yet.</h3><p>Try another status or search term.</p><button onClick={() => { setSearch(""); setOrderFilter("All orders"); }}>Show all orders</button></div>}
+  const visibleOrders = orders.filter(
+    (o) =>
+      (orderFilter === "All orders" || o.status === orderFilter) &&
+      `${o.id} ${o.product.name}`.toLowerCase().includes(search.toLowerCase()),
+  );
+  const catalog = products
+    .filter(
+      (p) =>
+        p.name.toLowerCase().includes(productSearch.toLowerCase()) &&
+        (category === "All categories" || p.category === category),
+    )
+    .sort((a, b) =>
+      sort === "Price: low to high"
+        ? a.price - b.price
+        : sort === "Price: high to low"
+          ? b.price - a.price
+          : a.id - b.id,
+    );
+  const titles = {
+    orders: [
+      "Your orders, all together.",
+      "From checkout to your doorstep. Follow every little delivery.",
+    ],
+    products: [
+      "Find your next favorite.",
+      "Explore the catalog. Compare good finds. Make it yours.",
+    ],
+    user: [
+      "A little space for you.",
+      "Your details, delivery addresses, and everyday preferences.",
+    ],
+  };
+  return (
+    <div className="service-page">
+      <div className="service-title">
+        <div>
+          <span className="service-eyebrow">
+            YOUR PASAR / {page === "user" ? "ACCOUNT" : page.toUpperCase()}
+          </span>
+          <h1>{titles[page][0]}</h1>
+          <p>{titles[page][1]}</p>
+        </div>
+        <span className="demo-pill">
+          <span />
+          Demo data · Backend coming soon
+        </span>
       </div>
-    </>}
-    {page === "products" && <div className="service-panel"><div className="catalog-toolbar"><label className="service-search"><Icon name="search" size={17} /><input aria-label="Search catalog" placeholder="Find a product you love..." value={productSearch} onChange={e => setProductSearch(e.target.value)} /></label><select aria-label="Filter by category" value={category} onChange={e => setCategory(e.target.value)}><option>All categories</option>{categories.slice(1).map(c => <option key={c.name}>{c.name}</option>)}</select><select aria-label="Sort products" value={sort} onChange={e => setSort(e.target.value)}><option>Featured</option><option>Price: low to high</option><option>Price: high to low</option></select></div><div className="catalog-result-count">{catalog.length} good finds <span>All prices in IDR · Demo availability</span></div><div className="catalog-table-wrap"><table className="catalog-table"><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Availability</th><th aria-label="Product actions" /></tr></thead><tbody>{catalog.map(p => <tr key={p.id}><td><button className="catalog-product" onClick={() => onProduct(p)}><img src={p.image} alt={p.name} /><span><strong>{p.name}</strong><small>PSR-{String(p.id).padStart(5, "0")} <span>·</span> ★ {p.rating}</small></span></button></td><td>{p.category}</td><td><strong>{currency(p.price)}</strong><del>{currency(p.original)}</del></td><td><span className="availability"><span />In stock</span><small className="stock-demo">Demo status</small></td><td><button className="catalog-add" aria-label={`Add ${p.name} to cart`} onClick={() => onAdd(p)}><Icon name="plus" size={16} /><span>Add</span></button></td></tr>)}</tbody></table></div>{catalog.length === 0 && <div className="empty-state"><Icon name="search" size={32} /><h3>No matching finds.</h3><p>Try a different keyword or category.</p><button onClick={() => { setProductSearch(""); setCategory("All categories"); }}>Reset filters</button></div>}</div>}
-    {page === "user" && <div className="account-layout"><aside className="account-nav"><div className="account-avatar">{profile.name.charAt(0)}</div><h2>{profile.name}</h2><span>Everyday explorer</span><div className="member-badge"><Icon name="shield" size={13} />Pasar member · Demo</div>{[{ name: "Personal details", icon: "bag" }, { name: "Delivery addresses", icon: "pin" }, { name: "Preferences", icon: "bell" }].map(t => <button key={t.name} className={userTab === t.name ? "active" : ""} onClick={() => setUserTab(t.name)}><Icon name={t.icon} size={18} />{t.name}<Icon name="chevron" size={14} /></button>)}</aside><section className="service-panel account-panel"><div className="service-panel-top"><div><h2>{userTab}</h2><p>{userTab === "Personal details" ? "Keep your everyday details up to date." : userTab === "Delivery addresses" ? "Good finds, delivered to the right place." : "Make pasar feel a little more like you."}</p></div>{userTab === "Delivery addresses" && <button className="service-solid" onClick={() => setAddressDraft({ id: Date.now(), label: "", recipient: profile.name, street: "", city: "", postal: "" })}><Icon name="plus" size={15} />Add address</button>}</div>
-      {userTab === "Personal details" && <form className="account-form" onSubmit={e => { e.preventDefault(); setProfile(draft); notify("Profile updated for this session only. User API is not connected."); }}><div className="profile-summary"><span className="small-avatar">{profile.name.charAt(0)}</span><div><strong>Your personal profile</strong><p>Only you can see and edit these details.</p></div></div><div className="form-grid"><label>Full name<input required maxLength={80} value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} /></label><label>Email address<input required type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })} /></label><label>Phone number<input required type="tel" value={draft.phone} onChange={e => setDraft({ ...draft, phone: e.target.value })} /></label><label>Birthday <span>(optional)</span><input type="date" value={draft.birthday} onChange={e => setDraft({ ...draft, birthday: e.target.value })} /></label></div><div className="account-info"><Icon name="shield" size={20} /><p>This is a preview account. Changes stay in this session and reset on reload. No authentication or personal data is sent to a server.</p></div><div className="form-actions"><button type="button" className="service-outline" onClick={() => setDraft(profile)}>Discard changes</button><button className="service-solid" type="submit">Save changes<Icon name="arrow" size={15} /></button></div></form>}
-      {userTab === "Delivery addresses" && <div className="address-list">{addresses.map(a => <article className="address-card" key={a.id}><div><span className="address-icon"><Icon name={a.label === "Home" ? "home" : "pin"} size={20} /></span><h3>{a.label}</h3>{defaultAddress === a.id && <span className="store-label">Default address</span>}</div><strong>{a.recipient}</strong><p>{a.street}<br />{a.city}, {a.postal}<br />Indonesia</p><div className="address-actions"><button onClick={() => setAddressDraft({ ...a })}>Edit address</button>{defaultAddress !== a.id && <><button onClick={() => { setDefaultAddress(a.id); notify("Default address changed for this demo session."); }}>Set as default</button><button onClick={() => setAddresses(current => current.filter(item => item.id !== a.id))}>Remove</button></>}</div></article>)}</div>}
-      {userTab === "Preferences" && <div className="preferences-list">{[{ key: "orders" as const, title: "Order updates", text: "Payment confirmations, delivery progress, and order news." }, { key: "offers" as const, title: "Good deals & offers", text: "Flash sales, little perks, and vouchers worth opening." }, { key: "recommendations" as const, title: "Made-for-you recommendations", text: "Fresh finds inspired by the things you love." }].map(p => <div className="preference-row" key={p.key}><div><h3>{p.title}</h3><p>{p.text}</p></div><button role="switch" aria-checked={preferences[p.key]} aria-label={p.title} className={`toggle ${preferences[p.key] ? "on" : ""}`} onClick={() => { setPreferences(current => ({ ...current, [p.key]: !current[p.key] })); notify("Preference updated locally. No notifications will be sent."); }}><span /></button></div>)}<div className="account-info"><Icon name="help" size={20} /><p>Preferences are preview-only. Notification delivery will be available when your User service is connected.</p></div></div>}
-    </section></div>}
-    <div className="service-note"><Icon name="shield" size={16} /><span>Thoughtfully built for what’s next. All records and actions on this page are frontend demonstrations.</span></div>
-    {tracking && <div className="overlay product-overlay" onClick={() => setTracking(null)}><section className="tracking-modal" role="dialog" aria-modal="true" aria-label="Order details" onClick={e => e.stopPropagation()}><div className="modal-heading"><h2>Your order’s journey</h2><button aria-label="Close details" onClick={() => setTracking(null)}><Icon name="close" /></button></div><div className="tracking-header"><span>{tracking.id}</span><strong>{tracking.status}</strong><p>{tracking.delivery}</p></div><div className="tracking-product"><img src={tracking.product.image} alt={tracking.product.name} /><div><strong>{tracking.product.name}</strong><p>{tracking.quantity} item(s) · {currency(tracking.product.price * tracking.quantity)}</p></div></div>{tracking.status === "Cancelled" ? <p className="tracking-message">This demo order was cancelled. No payment was taken.</p> : <ol className="timeline">{["Order placed", "Payment confirmed", "Preparing your parcel", "On the way", "Delivered"].map((step, i) => { const current = { "To pay": 0, Processing: 2, "In transit": 3, Delivered: 4, Cancelled: -1 }[tracking.status]; return <li className={i <= current ? "complete" : ""} key={step}><span>{i < current ? "✓" : i + 1}</span><div><strong>{step}</strong><p>{i === current ? "Current demo status" : i < current ? "Completed · Sample event" : "Waiting for an update"}</p></div></li>; })}</ol>}<div className="account-info"><Icon name="help" size={18} /><p>Sample tracking events. Live shipment and payment updates will come from your Order service.</p></div><button className="primary-button" onClick={() => setTracking(null)}>Got it</button></section></div>}
-    {addressDraft && <div className="overlay product-overlay" onClick={() => setAddressDraft(null)}><section className="tracking-modal" role="dialog" aria-modal="true" aria-label="Edit delivery address" onClick={e => e.stopPropagation()}><div className="modal-heading"><h2>Delivery address</h2><button aria-label="Close address form" onClick={() => setAddressDraft(null)}><Icon name="close" /></button></div><form className="address-form" onSubmit={e => { e.preventDefault(); setAddresses(current => current.some(a => a.id === addressDraft.id) ? current.map(a => a.id === addressDraft.id ? addressDraft : a) : [...current, addressDraft]); setAddressDraft(null); notify("Address saved for this session only."); }}>{([{ key: "label", label: "Label (e.g. Home)" }, { key: "recipient", label: "Recipient" }, { key: "street", label: "Street address" }, { key: "city", label: "City" }, { key: "postal", label: "Postal code" }] as const).map(f => <label key={f.key}>{f.label}<input required maxLength={160} value={addressDraft[f.key]} onChange={e => setAddressDraft({ ...addressDraft, [f.key]: e.target.value })} /></label>)}<button className="primary-button" type="submit">Save demo address</button></form></section></div>}
-  </div>;
+      {page === "orders" && (
+        <>
+          <div className="service-stats">
+            {[
+              { label: "All orders", value: orders.length, icon: "bag" },
+              {
+                label: "On their way",
+                value: orders.filter((o) => o.status === "In transit").length,
+                icon: "truck",
+              },
+              {
+                label: "To pay",
+                value: orders.filter((o) => o.status === "To pay").length,
+                icon: "cart",
+              },
+              {
+                label: "Delivered",
+                value: orders.filter((o) => o.status === "Delivered").length,
+                icon: "shield",
+              },
+            ].map((s) => (
+              <div key={s.label}>
+                <span className="stat-icon">
+                  <Icon name={s.icon} size={23} />
+                </span>
+                <div>
+                  <span>{s.label}</span>
+                  <strong>{s.value.toString().padStart(2, "0")}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="service-panel">
+            <div className="service-panel-top">
+              <h2>Order history</h2>
+              <label className="service-search">
+                <Icon name="search" size={17} />
+                <input
+                  aria-label="Search orders"
+                  placeholder="Search order or product"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="order-tabs">
+              {["All orders", ...statuses].map((s) => (
+                <button
+                  key={s}
+                  className={orderFilter === s ? "active" : ""}
+                  onClick={() => setOrderFilter(s)}
+                >
+                  {s}
+                  <span>
+                    {s === "All orders"
+                      ? orders.length
+                      : orders.filter((o) => o.status === s).length}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="order-list">
+              {visibleOrders.map((order) => (
+                <article className="order-card" key={order.id}>
+                  <div className="order-top">
+                    <span>
+                      <Icon name="bag" size={15} />
+                      <strong>{order.id}</strong>
+                      <span className="order-date">{order.date}</span>
+                    </span>
+                    <span
+                      className={`status-badge status-${order.status.toLowerCase().replaceAll(" ", "-")}`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="order-product">
+                    <button onClick={() => onProduct(order.product)}>
+                      <img src={order.product.image} alt={order.product.name} />
+                    </button>
+                    <div>
+                      <span className="store-label">
+                        <Icon name="shield" size={11} />
+                        {order.product.tag || "Verified seller"}
+                      </span>
+                      <button
+                        className="order-product-name"
+                        onClick={() => onProduct(order.product)}
+                      >
+                        {order.product.name}
+                      </button>
+                      <p>
+                        Quantity: {order.quantity} <span>·</span> {currency(order.product.price)}{" "}
+                        each
+                      </p>
+                    </div>
+                    <div className="order-total">
+                      <small>Order total</small>
+                      <strong>{currency(order.product.price * order.quantity)}</strong>
+                    </div>
+                  </div>
+                  <div className="order-bottom">
+                    <span>
+                      <Icon name={order.status === "Delivered" ? "shield" : "truck"} size={16} />
+                      {order.status === "Cancelled"
+                        ? "Cancelled in this demo session"
+                        : order.delivery}
+                    </span>
+                    <div>
+                      {order.status === "To pay" && (
+                        <button
+                          className="service-outline"
+                          onClick={() => {
+                            setOrders((current) =>
+                              current.map((o) =>
+                                o.id === order.id ? { ...o, status: "Cancelled" } : o,
+                              ),
+                            );
+                            notify(
+                              "Order cancelled locally for this demo. No backend request was sent.",
+                            );
+                          }}
+                        >
+                          Cancel order
+                        </button>
+                      )}
+                      {order.status === "Delivered" ? (
+                        <button className="service-solid" onClick={() => onAdd(order.product)}>
+                          Buy again <Icon name="plus" size={14} />
+                        </button>
+                      ) : (
+                        <button className="service-solid" onClick={() => setTracking(order)}>
+                          {order.status === "In transit" ? "Track order" : "View details"}
+                          <Icon name="arrow" size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {visibleOrders.length === 0 && (
+              <div className="empty-state">
+                <Icon name="bag" size={32} />
+                <h3>No orders here yet.</h3>
+                <p>Try another status or search term.</p>
+                <button
+                  onClick={() => {
+                    setSearch("");
+                    setOrderFilter("All orders");
+                  }}
+                >
+                  Show all orders
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      {page === "products" && (
+        <div className="service-panel">
+          <div className="catalog-toolbar">
+            <label className="service-search">
+              <Icon name="search" size={17} />
+              <input
+                aria-label="Search catalog"
+                placeholder="Find a product you love..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+              />
+            </label>
+            <select
+              aria-label="Filter by category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option>All categories</option>
+              {categories.slice(1).map((c) => (
+                <option key={c.name}>{c.name}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Sort products"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+            >
+              <option>Featured</option>
+              <option>Price: low to high</option>
+              <option>Price: high to low</option>
+            </select>
+          </div>
+          <div className="catalog-result-count">
+            {catalog.length} good finds <span>All prices in IDR · Demo availability</span>
+          </div>
+          <div className="catalog-table-wrap">
+            <table className="catalog-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Availability</th>
+                  <th aria-label="Product actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {catalog.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <button className="catalog-product" onClick={() => onProduct(p)}>
+                        <img src={p.image} alt={p.name} />
+                        <span>
+                          <strong>{p.name}</strong>
+                          <small>
+                            PSR-{String(p.id).padStart(5, "0")} <span>·</span> ★ {p.rating}
+                          </small>
+                        </span>
+                      </button>
+                    </td>
+                    <td>{p.category}</td>
+                    <td>
+                      <strong>{currency(p.price)}</strong>
+                      <del>{currency(p.original)}</del>
+                    </td>
+                    <td>
+                      <span className="availability">
+                        <span />
+                        In stock
+                      </span>
+                      <small className="stock-demo">Demo status</small>
+                    </td>
+                    <td>
+                      <button
+                        className="catalog-add"
+                        aria-label={`Add ${p.name} to cart`}
+                        onClick={() => onAdd(p)}
+                      >
+                        <Icon name="plus" size={16} />
+                        <span>Add</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {catalog.length === 0 && (
+            <div className="empty-state">
+              <Icon name="search" size={32} />
+              <h3>No matching finds.</h3>
+              <p>Try a different keyword or category.</p>
+              <button
+                onClick={() => {
+                  setProductSearch("");
+                  setCategory("All categories");
+                }}
+              >
+                Reset filters
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {page === "user" && (
+        <div className="account-layout">
+          <aside className="account-nav">
+            <div className="account-avatar">{profile.name.charAt(0)}</div>
+            <h2>{profile.name}</h2>
+            <span>Everyday explorer</span>
+            <div className="member-badge">
+              <Icon name="shield" size={13} />
+              Pasar member · Demo
+            </div>
+            {[
+              { name: "Personal details", icon: "bag" },
+              { name: "Delivery addresses", icon: "pin" },
+              { name: "Preferences", icon: "bell" },
+            ].map((t) => (
+              <button
+                key={t.name}
+                className={userTab === t.name ? "active" : ""}
+                onClick={() => setUserTab(t.name)}
+              >
+                <Icon name={t.icon} size={18} />
+                {t.name}
+                <Icon name="chevron" size={14} />
+              </button>
+            ))}
+          </aside>
+          <section className="service-panel account-panel">
+            <div className="service-panel-top">
+              <div>
+                <h2>{userTab}</h2>
+                <p>
+                  {userTab === "Personal details"
+                    ? "Keep your everyday details up to date."
+                    : userTab === "Delivery addresses"
+                      ? "Good finds, delivered to the right place."
+                      : "Make pasar feel a little more like you."}
+                </p>
+              </div>
+              {userTab === "Delivery addresses" && (
+                <button
+                  className="service-solid"
+                  onClick={() =>
+                    setAddressDraft({
+                      id: Date.now(),
+                      label: "",
+                      recipient: profile.name,
+                      street: "",
+                      city: "",
+                      postal: "",
+                    })
+                  }
+                >
+                  <Icon name="plus" size={15} />
+                  Add address
+                </button>
+              )}
+            </div>
+            {userTab === "Personal details" && (
+              <form
+                className="account-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setProfile(draft);
+                  notify("Profile updated for this session only. User API is not connected.");
+                }}
+              >
+                <div className="profile-summary">
+                  <span className="small-avatar">{profile.name.charAt(0)}</span>
+                  <div>
+                    <strong>Your personal profile</strong>
+                    <p>Only you can see and edit these details.</p>
+                  </div>
+                </div>
+                <div className="form-grid">
+                  <label>
+                    Full name
+                    <input
+                      required
+                      maxLength={80}
+                      value={draft.name}
+                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Email address
+                    <input
+                      required
+                      type="email"
+                      value={draft.email}
+                      onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Phone number
+                    <input
+                      required
+                      type="tel"
+                      value={draft.phone}
+                      onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Birthday <span>(optional)</span>
+                    <input
+                      type="date"
+                      value={draft.birthday}
+                      onChange={(e) => setDraft({ ...draft, birthday: e.target.value })}
+                    />
+                  </label>
+                </div>
+                <div className="account-info">
+                  <Icon name="shield" size={20} />
+                  <p>
+                    This is a preview account. Changes stay in this session and reset on reload. No
+                    authentication or personal data is sent to a server.
+                  </p>
+                </div>
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="service-outline"
+                    onClick={() => setDraft(profile)}
+                  >
+                    Discard changes
+                  </button>
+                  <button className="service-solid" type="submit">
+                    Save changes
+                    <Icon name="arrow" size={15} />
+                  </button>
+                </div>
+              </form>
+            )}
+            {userTab === "Delivery addresses" && (
+              <div className="address-list">
+                {addresses.map((a) => (
+                  <article className="address-card" key={a.id}>
+                    <div>
+                      <span className="address-icon">
+                        <Icon name={a.label === "Home" ? "home" : "pin"} size={20} />
+                      </span>
+                      <h3>{a.label}</h3>
+                      {defaultAddress === a.id && (
+                        <span className="store-label">Default address</span>
+                      )}
+                    </div>
+                    <strong>{a.recipient}</strong>
+                    <p>
+                      {a.street}
+                      <br />
+                      {a.city}, {a.postal}
+                      <br />
+                      Indonesia
+                    </p>
+                    <div className="address-actions">
+                      <button onClick={() => setAddressDraft({ ...a })}>Edit address</button>
+                      {defaultAddress !== a.id && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setDefaultAddress(a.id);
+                              notify("Default address changed for this demo session.");
+                            }}
+                          >
+                            Set as default
+                          </button>
+                          <button
+                            onClick={() =>
+                              setAddresses((current) => current.filter((item) => item.id !== a.id))
+                            }
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+            {userTab === "Preferences" && (
+              <div className="preferences-list">
+                {[
+                  {
+                    key: "orders" as const,
+                    title: "Order updates",
+                    text: "Payment confirmations, delivery progress, and order news.",
+                  },
+                  {
+                    key: "offers" as const,
+                    title: "Good deals & offers",
+                    text: "Flash sales, little perks, and vouchers worth opening.",
+                  },
+                  {
+                    key: "recommendations" as const,
+                    title: "Made-for-you recommendations",
+                    text: "Fresh finds inspired by the things you love.",
+                  },
+                ].map((p) => (
+                  <div className="preference-row" key={p.key}>
+                    <div>
+                      <h3>{p.title}</h3>
+                      <p>{p.text}</p>
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={preferences[p.key]}
+                      aria-label={p.title}
+                      className={`toggle ${preferences[p.key] ? "on" : ""}`}
+                      onClick={() => {
+                        setPreferences((current) => ({ ...current, [p.key]: !current[p.key] }));
+                        notify("Preference updated locally. No notifications will be sent.");
+                      }}
+                    >
+                      <span />
+                    </button>
+                  </div>
+                ))}
+                <div className="account-info">
+                  <Icon name="help" size={20} />
+                  <p>
+                    Preferences are preview-only. Notification delivery will be available when your
+                    User service is connected.
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+      <div className="service-note">
+        <Icon name="shield" size={16} />
+        <span>
+          Thoughtfully built for what’s next. All records and actions on this page are frontend
+          demonstrations.
+        </span>
+      </div>
+      {tracking && (
+        <div className="overlay product-overlay" onClick={() => setTracking(null)}>
+          <section
+            className="tracking-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Order details"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-heading">
+              <h2>Your order’s journey</h2>
+              <button aria-label="Close details" onClick={() => setTracking(null)}>
+                <Icon name="close" />
+              </button>
+            </div>
+            <div className="tracking-header">
+              <span>{tracking.id}</span>
+              <strong>{tracking.status}</strong>
+              <p>{tracking.delivery}</p>
+            </div>
+            <div className="tracking-product">
+              <img src={tracking.product.image} alt={tracking.product.name} />
+              <div>
+                <strong>{tracking.product.name}</strong>
+                <p>
+                  {tracking.quantity} item(s) ·{" "}
+                  {currency(tracking.product.price * tracking.quantity)}
+                </p>
+              </div>
+            </div>
+            {tracking.status === "Cancelled" ? (
+              <p className="tracking-message">
+                This demo order was cancelled. No payment was taken.
+              </p>
+            ) : (
+              <ol className="timeline">
+                {[
+                  "Order placed",
+                  "Payment confirmed",
+                  "Preparing your parcel",
+                  "On the way",
+                  "Delivered",
+                ].map((step, i) => {
+                  const current = {
+                    "To pay": 0,
+                    Processing: 2,
+                    "In transit": 3,
+                    Delivered: 4,
+                    Cancelled: -1,
+                  }[tracking.status];
+                  return (
+                    <li className={i <= current ? "complete" : ""} key={step}>
+                      <span>{i < current ? "✓" : i + 1}</span>
+                      <div>
+                        <strong>{step}</strong>
+                        <p>
+                          {i === current
+                            ? "Current demo status"
+                            : i < current
+                              ? "Completed · Sample event"
+                              : "Waiting for an update"}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+            <div className="account-info">
+              <Icon name="help" size={18} />
+              <p>
+                Sample tracking events. Live shipment and payment updates will come from your Order
+                service.
+              </p>
+            </div>
+            <button className="primary-button" onClick={() => setTracking(null)}>
+              Got it
+            </button>
+          </section>
+        </div>
+      )}
+      {addressDraft && (
+        <div className="overlay product-overlay" onClick={() => setAddressDraft(null)}>
+          <section
+            className="tracking-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit delivery address"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-heading">
+              <h2>Delivery address</h2>
+              <button aria-label="Close address form" onClick={() => setAddressDraft(null)}>
+                <Icon name="close" />
+              </button>
+            </div>
+            <form
+              className="address-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setAddresses((current) =>
+                  current.some((a) => a.id === addressDraft.id)
+                    ? current.map((a) => (a.id === addressDraft.id ? addressDraft : a))
+                    : [...current, addressDraft],
+                );
+                setAddressDraft(null);
+                notify("Address saved for this session only.");
+              }}
+            >
+              {(
+                [
+                  { key: "label", label: "Label (e.g. Home)" },
+                  { key: "recipient", label: "Recipient" },
+                  { key: "street", label: "Street address" },
+                  { key: "city", label: "City" },
+                  { key: "postal", label: "Postal code" },
+                ] as const
+              ).map((f) => (
+                <label key={f.key}>
+                  {f.label}
+                  <input
+                    required
+                    maxLength={160}
+                    value={addressDraft[f.key]}
+                    onChange={(e) => setAddressDraft({ ...addressDraft, [f.key]: e.target.value })}
+                  />
+                </label>
+              ))}
+              <button className="primary-button" type="submit">
+                Save demo address
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  );
 }
