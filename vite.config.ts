@@ -142,7 +142,11 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
           });
         }
         if (favicon) {
-          tags.push({ tag: "link", attrs: { rel: "icon", href: favicon }, injectTo: "head" });
+          tags.push({
+            tag: "link",
+            attrs: { rel: "icon", href: favicon },
+            injectTo: "head",
+          });
         }
         if (title) {
           tags.push({

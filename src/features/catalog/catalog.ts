@@ -1,15 +1,5 @@
-export type Product = {
-  id: number;
-  name: string;
-  price: number;
-  original: number;
-  image: string;
-  category: string;
-  rating: string;
-  sold: string;
-  city: string;
-  tag?: string;
-};
+import { Product } from "@/services/type";
+
 const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=85`;
 export const categories = [
   { name: "For you", icon: "grid" },
