@@ -1,5 +1,6 @@
+import { Product } from "@/services/type";
 import { useState } from "react";
-import type { Product } from "../catalog/catalog";
+
 export default function useCart() {
   const [items, setItems] = useState<{ product: Product; quantity: number }[]>([]);
   function add(product: Product) {

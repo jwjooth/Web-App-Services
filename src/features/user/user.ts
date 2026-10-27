@@ -1,4 +1,9 @@
-export type UserProfile = { name: string; email: string; phone: string; birthday: string };
+export type UserProfile = {
+  name: string;
+  email: string;
+  phone: string;
+  birthday: string;
+};
 export type Address = {
   id: number;
   label: string;

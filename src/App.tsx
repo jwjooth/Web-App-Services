@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Icon from "./components/Icon";
-import { categories, currency, products, type Product } from "./features/catalog/catalog";
+import { categories, currency, products } from "./features/catalog/catalog";
 import useCart from "./features/cart/useCart";
 import ServicePages, { type ServicePage } from "./features/ServicePages";
+import { Product } from "./services/type";
 
 export default function App() {
   const [page, setPage] = useState<ServicePage>("shop");
@@ -493,8 +494,16 @@ export default function App() {
                   title: "100% authentic",
                   text: "Real brands. Real peace of mind.",
                 },
-                { icon: "truck", title: "Free delivery", text: "More joy, less shipping fees." },
-                { icon: "bag", title: "Shop with confidence", text: "Secure payments, always." },
+                {
+                  icon: "truck",
+                  title: "Free delivery",
+                  text: "More joy, less shipping fees.",
+                },
+                {
+                  icon: "bag",
+                  title: "Shop with confidence",
+                  text: "Secure payments, always.",
+                },
                 {
                   icon: "headphones",
                   title: "Here for you",
