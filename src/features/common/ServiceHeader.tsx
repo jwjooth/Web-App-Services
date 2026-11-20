@@ -2,9 +2,7 @@ import Icon from "@/components/Icon"
 
 type Props = {
   eyebrow: string
-
   title: string
-
   description: string
 }
 

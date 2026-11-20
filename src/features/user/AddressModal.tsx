@@ -1,26 +1,18 @@
 import Icon from "@/components/Icon"
-
-import type { Address } from "./user"
+import { Address } from "@/services/type"
 
 type Props = {
   draft: Address
-
   onChange: (draft: Address) => void
-
   onSave: (address: Address) => void
-
   onClose: () => void
 }
 
 const ADDRESS_FIELDS = [
   { key: "label", label: "Label (e.g. Home)" },
-
   { key: "recipient", label: "Recipient" },
-
   { key: "street", label: "Street address" },
-
   { key: "city", label: "City" },
-
   { key: "postal", label: "Postal code" },
 ] as const
 

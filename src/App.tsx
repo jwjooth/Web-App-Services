@@ -2,7 +2,12 @@ import { useEffect, useState } from "react"
 
 import Icon from "./components/Icon"
 
-import { categories, currency, products } from "./features/catalog/catalog"
+import {
+  categories,
+  currency,
+  products,
+  useProducts,
+} from "./features/catalog/catalog"
 
 import useCart from "./features/cart/useCart"
 
@@ -34,38 +39,14 @@ export default function App() {
   const [banner, setBanner] = useState(0)
 
   const cart = useCart()
-
-  useEffect(() => {
-    const id = setInterval(() => setSeconds((s) => Math.max(0, s - 1)), 1000)
-
-    return () => clearInterval(id)
-  }, [])
-
-  useEffect(() => {
-    if (notice) {
-      const id = setTimeout(() => setNotice(""), 3500)
-
-      return () => clearTimeout(id)
-    }
-  }, [notice])
-
-  const filtered = products.filter(
-    (p) =>
-      (category === "For you" || p.category === category) &&
-      p.name.toLowerCase().includes(query.toLowerCase()) &&
-      (!showSaved || saved.includes(p.id)),
+  const recommended = useProducts(
+    products,
+    category,
+    query,
+    showSaved,
+    saved,
+    tab,
   )
-
-  const recommended =
-    tab === "Best sellers"
-      ? [...filtered].sort(
-          (a, b) => Number.parseFloat(b.sold) - Number.parseFloat(a.sold),
-        )
-      : tab === "Under Rp100k"
-        ? filtered.filter((p) => p.price < 100000)
-        : tab === "New arrivals"
-          ? [...filtered].reverse()
-          : filtered
 
   function toggleSaved(id: number) {
     setSaved((s) => (s.includes(id) ? s.filter((i) => i !== id) : [...s, id]))

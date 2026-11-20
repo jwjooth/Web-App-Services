@@ -1,9 +1,7 @@
 import { useState } from "react"
-
 import Icon from "@/components/Icon"
-
-import { demoAddresses, demoUser, type Address, type UserProfile } from "./user"
-
+import { demoAddresses, demoUser } from "./user"
+import { Address, UserProfile } from "@/services/type"
 import AddressModal from "./AddressModal"
 
 type Props = {
@@ -12,58 +10,44 @@ type Props = {
 
 type UserTab = "Personal details" | "Delivery addresses" | "Preferences"
 
-const TABS: { name: UserTab, icon: "bag" | "pin" | "bell" }[] = [
+const TABS: {
+  name: UserTab
+  icon: "bag" | "pin" | "bell"
+}[] = [
   { name: "Personal details", icon: "bag" },
-
   { name: "Delivery addresses", icon: "pin" },
-
   { name: "Preferences", icon: "bell" },
 ]
 
 const PREFERENCE_ITEMS = [
   {
     key: "orders" as const,
-
     title: "Order updates",
-
     text: "Payment confirmations, delivery progress, and order news.",
   },
-
   {
     key: "offers" as const,
-
     title: "Good deals & offers",
-
     text: "Flash sales, little perks, and vouchers worth opening.",
   },
 
   {
     key: "recommendations" as const,
-
     title: "Made-for-you recommendations",
-
     text: "Fresh finds inspired by the things you love.",
   },
 ]
 
 export default function UserAccountPage({ notify }: Props) {
   const [userTab, setUserTab] = useState<UserTab>("Personal details")
-
   const [profile, setProfile] = useState<UserProfile>(demoUser)
-
   const [draft, setDraft] = useState<UserProfile>(demoUser)
-
   const [addresses, setAddresses] = useState<Address[]>(demoAddresses)
-
   const [defaultAddress, setDefaultAddress] = useState<number>(1)
-
   const [addressDraft, setAddressDraft] = useState<Address | null>(null)
-
   const [preferences, setPreferences] = useState({
     orders: true,
-
     offers: false,
-
     recommendations: true,
   })
 
@@ -73,9 +57,7 @@ export default function UserAccountPage({ notify }: Props) {
         ? current.map((a) => (a.id === saved.id ? saved : a))
         : [...current, saved],
     )
-
     setAddressDraft(null)
-
     notify("Address saved for this session only.")
   }
 

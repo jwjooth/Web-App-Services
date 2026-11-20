@@ -1,14 +1,5 @@
+import { Order, OrderStatus } from "@/services/type"
 import { products } from "../catalog/catalog"
-
-export type OrderStatus = "To pay" | "Processing" | "In transit" | "Delivered" | "Cancelled"
-export type Order = {
-  id: string
-  date: string
-  status: OrderStatus
-  product: typeof products[number]
-  quantity: number
-  delivery: string
-}
 
 export const demoOrders: Order[] = [
   {
