@@ -11,10 +11,10 @@ export default function useCart() {
     setItems((current) =>
       current.some((item) => item.product.id === product.id)
         ? current.map((item) =>
-            item.product.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item,
-          )
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        )
         : [...current, { product, quantity: 1 }],
     )
   }
