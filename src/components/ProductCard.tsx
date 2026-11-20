@@ -73,7 +73,7 @@ export default function ProductCard({
         {flash ? (
           <div className="stock">
             <div>
-              <span style={{ width: `${35 + p.id * 7}%` }} />
+              <span style={{ width: `${Math.min(100, 35 + p.id * 7)}%` }} />
             </div>
             <span>Selling fast</span>
           </div>

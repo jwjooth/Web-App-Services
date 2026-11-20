@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import CartDrawer from "./components/CartDrawer"
 import Header from "./components/Header"
 import Icon from "./components/Icon"
@@ -20,7 +20,15 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false)
   const [selected, setSelected] = useState<Product | null>(null)
   const [notice, setNotice] = useState("")
-  const [seconds] = useState(3 * 3600 + 42 * 60 + 18)
+  const [seconds, setSeconds] = useState(3 * 3600 + 42 * 60 + 18)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSeconds((s) => (s > 0 ? s - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   const [banner, setBanner] = useState(0)
 
   const cart = useCart()
