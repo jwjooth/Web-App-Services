@@ -1,31 +1,39 @@
-import { useState } from "react";
-import Icon from "@/components/Icon";
-import { categories, currency, products } from "./catalog";
-import type { Product } from "@/services/type";
+import { useState } from "react"
+
+import Icon from "@/components/Icon"
+
+import { categories, currency, products } from "./catalog"
+
+import type { Product } from "@/services/type"
 
 type Props = {
-  onProduct: (product: Product) => void;
-  onAdd: (product: Product) => void;
-};
+  onProduct: (product: Product) => void
+
+  onAdd: (product: Product) => void
+}
 
 export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
-  const [productSearch, setProductSearch] = useState("");
-  const [category, setCategory] = useState("All categories");
-  const [sort, setSort] = useState("Featured");
+  const [productSearch, setProductSearch] = useState("")
+
+  const [category, setCategory] = useState("All categories")
+
+  const [sort, setSort] = useState("Featured")
 
   const catalog = products
+
     .filter(
       (p) =>
         p.name.toLowerCase().includes(productSearch.toLowerCase()) &&
         (category === "All categories" || p.category === category),
     )
+
     .sort((a, b) =>
       sort === "Price: low to high"
         ? a.price - b.price
         : sort === "Price: high to low"
           ? b.price - a.price
           : a.id - b.id,
-    );
+    )
 
   return (
     <div className="service-panel">
@@ -49,7 +57,11 @@ export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
             <option key={c.name}>{c.name}</option>
           ))}
         </select>
-        <select aria-label="Sort products" value={sort} onChange={(e) => setSort(e.target.value)}>
+        <select
+          aria-label="Sort products"
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+        >
           <option>Featured</option>
           <option>Price: low to high</option>
           <option>Price: high to low</option>
@@ -57,7 +69,8 @@ export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
       </div>
 
       <div className="catalog-result-count">
-        {catalog.length} good finds <span>All prices in IDR · Demo availability</span>
+        {catalog.length} good finds{" "}
+        <span>All prices in IDR · Demo availability</span>
       </div>
 
       <div className="catalog-table-wrap">
@@ -75,12 +88,16 @@ export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
             {catalog.map((p) => (
               <tr key={p.id}>
                 <td>
-                  <button className="catalog-product" onClick={() => onProduct(p)}>
+                  <button
+                    className="catalog-product"
+                    onClick={() => onProduct(p)}
+                  >
                     <img src={p.image} alt={p.name} />
                     <span>
                       <strong>{p.name}</strong>
                       <small>
-                        PSR-{String(p.id).padStart(5, "0")} <span>·</span> ★ {p.rating}
+                        PSR-{String(p.id).padStart(5, "0")} <span>·</span> ★{" "}
+                        {p.rating}
                       </small>
                     </span>
                   </button>
@@ -120,8 +137,9 @@ export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
           <p>Try a different keyword or category.</p>
           <button
             onClick={() => {
-              setProductSearch("");
-              setCategory("All categories");
+              setProductSearch("")
+
+              setCategory("All categories")
             }}
           >
             Reset filters
@@ -129,5 +147,5 @@ export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
         </div>
       )}
     </div>
-  );
+  )
 }

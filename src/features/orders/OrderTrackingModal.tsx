@@ -1,28 +1,39 @@
-import Icon from "@/components/Icon";
-import { currency } from "../catalog/catalog";
-import type { Order } from "./orders";
+import Icon from "@/components/Icon"
+
+import { currency } from "../catalog/catalog"
+
+import type { Order } from "./orders"
 
 type Props = {
-  order: Order;
-  onClose: () => void;
-};
+  order: Order
+
+  onClose: () => void
+}
 
 const TIMELINE_STEPS = [
   "Order placed",
+
   "Payment confirmed",
+
   "Preparing your parcel",
+
   "On the way",
+
   "Delivered",
-] as const;
+] as const
 
 export default function OrderTrackingModal({ order, onClose }: Props) {
   const currentStep = {
     "To pay": 0,
+
     Processing: 2,
+
     "In transit": 3,
+
     Delivered: 4,
+
     Cancelled: -1,
-  }[order.status];
+  }[order.status]
 
   return (
     <div className="overlay product-overlay" onClick={onClose}>
@@ -49,12 +60,15 @@ export default function OrderTrackingModal({ order, onClose }: Props) {
           <div>
             <strong>{order.product.name}</strong>
             <p>
-              {order.quantity} item(s) · {currency(order.product.price * order.quantity)}
+              {order.quantity} item(s) ·{" "}
+              {currency(order.product.price * order.quantity)}
             </p>
           </div>
         </div>
         {order.status === "Cancelled" ? (
-          <p className="tracking-message">This demo order was cancelled. No payment was taken.</p>
+          <p className="tracking-message">
+            This demo order was cancelled. No payment was taken.
+          </p>
         ) : (
           <ol className="timeline">
             {TIMELINE_STEPS.map((step, i) => (
@@ -77,8 +91,8 @@ export default function OrderTrackingModal({ order, onClose }: Props) {
         <div className="account-info">
           <Icon name="help" size={18} />
           <p>
-            Sample tracking events. Live shipment and payment updates will come from your Order
-            service.
+            Sample tracking events. Live shipment and payment updates will come
+            from your Order service.
           </p>
         </div>
         <button className="primary-button" onClick={onClose}>
@@ -86,5 +100,5 @@ export default function OrderTrackingModal({ order, onClose }: Props) {
         </button>
       </section>
     </div>
-  );
+  )
 }

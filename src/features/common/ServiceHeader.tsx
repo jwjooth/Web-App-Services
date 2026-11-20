@@ -1,10 +1,12 @@
-import Icon from "@/components/Icon";
+import Icon from "@/components/Icon"
 
 type Props = {
-  eyebrow: string;
-  title: string;
-  description: string;
-};
+  eyebrow: string
+
+  title: string
+
+  description: string
+}
 
 export default function ServiceHeader({ eyebrow, title, description }: Props) {
   return (
@@ -21,7 +23,7 @@ export default function ServiceHeader({ eyebrow, title, description }: Props) {
         </span>
       </div>
     </>
-  );
+  )
 }
 
 export function ServiceFooterNote() {
@@ -29,9 +31,9 @@ export function ServiceFooterNote() {
     <div className="service-note">
       <Icon name="shield" size={16} />
       <span>
-        Thoughtfully built for what’s next. All records and actions on this page are frontend
-        demonstrations.
+        Thoughtfully built for what’s next. All records and actions on this page
+        are frontend demonstrations.
       </span>
     </div>
-  );
+  )
 }

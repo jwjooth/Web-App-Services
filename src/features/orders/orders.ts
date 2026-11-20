@@ -1,14 +1,14 @@
-import { products } from "../catalog/catalog";
+import { products } from "../catalog/catalog"
 
-export type OrderStatus = "To pay" | "Processing" | "In transit" | "Delivered" | "Cancelled";
+export type OrderStatus = "To pay" | "Processing" | "In transit" | "Delivered" | "Cancelled"
 export type Order = {
-  id: string;
-  date: string;
-  status: OrderStatus;
-  product: (typeof products)[number];
-  quantity: number;
-  delivery: string;
-};
+  id: string
+  date: string
+  status: OrderStatus
+  product: typeof products[number]
+  quantity: number
+  delivery: string
+}
 
 export const demoOrders: Order[] = [
   {
@@ -43,4 +43,4 @@ export const demoOrders: Order[] = [
     quantity: 1,
     delivery: "Delivered on 13 May 2026",
   },
-];
+]

@@ -1,22 +1,35 @@
-import Icon from "@/components/Icon";
-import type { Address } from "./user";
+import Icon from "@/components/Icon"
+
+import type { Address } from "./user"
 
 type Props = {
-  draft: Address;
-  onChange: (draft: Address) => void;
-  onSave: (address: Address) => void;
-  onClose: () => void;
-};
+  draft: Address
+
+  onChange: (draft: Address) => void
+
+  onSave: (address: Address) => void
+
+  onClose: () => void
+}
 
 const ADDRESS_FIELDS = [
   { key: "label", label: "Label (e.g. Home)" },
-  { key: "recipient", label: "Recipient" },
-  { key: "street", label: "Street address" },
-  { key: "city", label: "City" },
-  { key: "postal", label: "Postal code" },
-] as const;
 
-export default function AddressModal({ draft, onChange, onSave, onClose }: Props) {
+  { key: "recipient", label: "Recipient" },
+
+  { key: "street", label: "Street address" },
+
+  { key: "city", label: "City" },
+
+  { key: "postal", label: "Postal code" },
+] as const
+
+export default function AddressModal({
+  draft,
+  onChange,
+  onSave,
+  onClose,
+}: Props) {
   return (
     <div className="overlay product-overlay" onClick={onClose}>
       <section
@@ -35,8 +48,9 @@ export default function AddressModal({ draft, onChange, onSave, onClose }: Props
         <form
           className="address-form"
           onSubmit={(e) => {
-            e.preventDefault();
-            onSave(draft);
+            e.preventDefault()
+
+            onSave(draft)
           }}
         >
           {ADDRESS_FIELDS.map((f) => (
@@ -46,7 +60,9 @@ export default function AddressModal({ draft, onChange, onSave, onClose }: Props
                 required
                 maxLength={160}
                 value={draft[f.key]}
-                onChange={(e) => onChange({ ...draft, [f.key]: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...draft, [f.key]: e.target.value })
+                }
               />
             </label>
           ))}
@@ -56,5 +72,5 @@ export default function AddressModal({ draft, onChange, onSave, onClose }: Props
         </form>
       </section>
     </div>
-  );
+  )
 }

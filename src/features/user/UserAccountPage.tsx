@@ -1,59 +1,82 @@
-import { useState } from "react";
-import Icon from "@/components/Icon";
-import { demoAddresses, demoUser, type Address, type UserProfile } from "./user";
-import AddressModal from "./AddressModal";
+import { useState } from "react"
+
+import Icon from "@/components/Icon"
+
+import { demoAddresses, demoUser, type Address, type UserProfile } from "./user"
+
+import AddressModal from "./AddressModal"
 
 type Props = {
-  notify: (message: string) => void;
-};
+  notify: (message: string) => void
+}
 
-type UserTab = "Personal details" | "Delivery addresses" | "Preferences";
+type UserTab = "Personal details" | "Delivery addresses" | "Preferences"
 
-const TABS: { name: UserTab; icon: "bag" | "pin" | "bell" }[] = [
+const TABS: { name: UserTab icon: "bag" | "pin" | "bell" }[] = [
   { name: "Personal details", icon: "bag" },
+
   { name: "Delivery addresses", icon: "pin" },
+
   { name: "Preferences", icon: "bell" },
-];
+]
 
 const PREFERENCE_ITEMS = [
   {
     key: "orders" as const,
+
     title: "Order updates",
+
     text: "Payment confirmations, delivery progress, and order news.",
   },
+
   {
     key: "offers" as const,
+
     title: "Good deals & offers",
+
     text: "Flash sales, little perks, and vouchers worth opening.",
   },
+
   {
     key: "recommendations" as const,
+
     title: "Made-for-you recommendations",
+
     text: "Fresh finds inspired by the things you love.",
   },
-];
+]
 
 export default function UserAccountPage({ notify }: Props) {
-  const [userTab, setUserTab] = useState<UserTab>("Personal details");
-  const [profile, setProfile] = useState<UserProfile>(demoUser);
-  const [draft, setDraft] = useState<UserProfile>(demoUser);
-  const [addresses, setAddresses] = useState<Address[]>(demoAddresses);
-  const [defaultAddress, setDefaultAddress] = useState<number>(1);
-  const [addressDraft, setAddressDraft] = useState<Address | null>(null);
+  const [userTab, setUserTab] = useState<UserTab>("Personal details")
+
+  const [profile, setProfile] = useState<UserProfile>(demoUser)
+
+  const [draft, setDraft] = useState<UserProfile>(demoUser)
+
+  const [addresses, setAddresses] = useState<Address[]>(demoAddresses)
+
+  const [defaultAddress, setDefaultAddress] = useState<number>(1)
+
+  const [addressDraft, setAddressDraft] = useState<Address | null>(null)
+
   const [preferences, setPreferences] = useState({
     orders: true,
+
     offers: false,
+
     recommendations: true,
-  });
+  })
 
   function handleSaveAddress(saved: Address) {
     setAddresses((current) =>
       current.some((a) => a.id === saved.id)
         ? current.map((a) => (a.id === saved.id ? saved : a))
         : [...current, saved],
-    );
-    setAddressDraft(null);
-    notify("Address saved for this session only.");
+    )
+
+    setAddressDraft(null)
+
+    notify("Address saved for this session only.")
   }
 
   return (
@@ -97,10 +120,15 @@ export default function UserAccountPage({ notify }: Props) {
               onClick={() =>
                 setAddressDraft({
                   id: Date.now(),
+
                   label: "",
+
                   recipient: profile.name,
+
                   street: "",
+
                   city: "",
+
                   postal: "",
                 })
               }
@@ -115,9 +143,13 @@ export default function UserAccountPage({ notify }: Props) {
           <form
             className="account-form"
             onSubmit={(e) => {
-              e.preventDefault();
-              setProfile(draft);
-              notify("Profile updated for this session only. User API is not connected.");
+              e.preventDefault()
+
+              setProfile(draft)
+
+              notify(
+                "Profile updated for this session only. User API is not connected.",
+              )
             }}
           >
             <div className="profile-summary">
@@ -143,7 +175,9 @@ export default function UserAccountPage({ notify }: Props) {
                   required
                   type="email"
                   value={draft.email}
-                  onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+                  onChange={(e) =>
+                    setDraft({ ...draft, email: e.target.value })
+                  }
                 />
               </label>
               <label>
@@ -152,7 +186,9 @@ export default function UserAccountPage({ notify }: Props) {
                   required
                   type="tel"
                   value={draft.phone}
-                  onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
+                  onChange={(e) =>
+                    setDraft({ ...draft, phone: e.target.value })
+                  }
                 />
               </label>
               <label>
@@ -160,19 +196,26 @@ export default function UserAccountPage({ notify }: Props) {
                 <input
                   type="date"
                   value={draft.birthday}
-                  onChange={(e) => setDraft({ ...draft, birthday: e.target.value })}
+                  onChange={(e) =>
+                    setDraft({ ...draft, birthday: e.target.value })
+                  }
                 />
               </label>
             </div>
             <div className="account-info">
               <Icon name="shield" size={20} />
               <p>
-                This is a preview account. Changes stay in this session and reset on reload. No
-                authentication or personal data is sent to a server.
+                This is a preview account. Changes stay in this session and
+                reset on reload. No authentication or personal data is sent to a
+                server.
               </p>
             </div>
             <div className="form-actions">
-              <button type="button" className="service-outline" onClick={() => setDraft(profile)}>
+              <button
+                type="button"
+                className="service-outline"
+                onClick={() => setDraft(profile)}
+              >
                 Discard changes
               </button>
               <button className="service-solid" type="submit">
@@ -189,10 +232,15 @@ export default function UserAccountPage({ notify }: Props) {
               <article className="address-card" key={a.id}>
                 <div>
                   <span className="address-icon">
-                    <Icon name={a.label === "Home" ? "home" : "pin"} size={20} />
+                    <Icon
+                      name={a.label === "Home" ? "home" : "pin"}
+                      size={20}
+                    />
                   </span>
                   <h3>{a.label}</h3>
-                  {defaultAddress === a.id && <span className="store-label">Default address</span>}
+                  {defaultAddress === a.id && (
+                    <span className="store-label">Default address</span>
+                  )}
                 </div>
                 <strong>{a.recipient}</strong>
                 <p>
@@ -203,20 +251,27 @@ export default function UserAccountPage({ notify }: Props) {
                   Indonesia
                 </p>
                 <div className="address-actions">
-                  <button onClick={() => setAddressDraft({ ...a })}>Edit address</button>
+                  <button onClick={() => setAddressDraft({ ...a })}>
+                    Edit address
+                  </button>
                   {defaultAddress !== a.id && (
                     <>
                       <button
                         onClick={() => {
-                          setDefaultAddress(a.id);
-                          notify("Default address changed for this demo session.");
+                          setDefaultAddress(a.id)
+
+                          notify(
+                            "Default address changed for this demo session.",
+                          )
                         }}
                       >
                         Set as default
                       </button>
                       <button
                         onClick={() =>
-                          setAddresses((current) => current.filter((item) => item.id !== a.id))
+                          setAddresses((current) =>
+                            current.filter((item) => item.id !== a.id),
+                          )
                         }
                       >
                         Remove
@@ -245,9 +300,13 @@ export default function UserAccountPage({ notify }: Props) {
                   onClick={() => {
                     setPreferences((current) => ({
                       ...current,
+
                       [p.key]: !current[p.key],
-                    }));
-                    notify("Preference updated locally. No notifications will be sent.");
+                    }))
+
+                    notify(
+                      "Preference updated locally. No notifications will be sent.",
+                    )
                   }}
                 >
                   <span />
@@ -257,8 +316,8 @@ export default function UserAccountPage({ notify }: Props) {
             <div className="account-info">
               <Icon name="help" size={20} />
               <p>
-                Preferences are preview-only. Notification delivery will be available when your User
-                service is connected.
+                Preferences are preview-only. Notification delivery will be
+                available when your User service is connected.
               </p>
             </div>
           </div>
@@ -274,5 +333,5 @@ export default function UserAccountPage({ notify }: Props) {
         />
       )}
     </div>
-  );
+  )
 }

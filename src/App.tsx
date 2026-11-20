@@ -1,77 +1,112 @@
-import { useEffect, useState } from "react";
-import Icon from "./components/Icon";
-import { categories, currency, products } from "./features/catalog/catalog";
-import useCart from "./features/cart/useCart";
-import ServicePages, { type ServicePage } from "./features/ServicePages";
-import { Product } from "./services/type";
+import { useEffect, useState } from "react"
+
+import Icon from "./components/Icon"
+
+import { categories, currency, products } from "./features/catalog/catalog"
+
+import useCart from "./features/cart/useCart"
+
+import ServicePages, { type ServicePage } from "./features/ServicePages"
+
+import { Product } from "./services/type"
 
 export default function App() {
-  const [page, setPage] = useState<ServicePage>("shop");
-  const [category, setCategory] = useState("For you");
-  const [query, setQuery] = useState("");
-  const [tab, setTab] = useState("For you");
-  const [saved, setSaved] = useState<number[]>([]);
-  const [showSaved, setShowSaved] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [selected, setSelected] = useState<Product | null>(null);
-  const [notice, setNotice] = useState("");
-  const [seconds, setSeconds] = useState(3 * 3600 + 42 * 60 + 18);
-  const [banner, setBanner] = useState(0);
-  const cart = useCart();
+  const [page, setPage] = useState<ServicePage>("shop")
+
+  const [category, setCategory] = useState("For you")
+
+  const [query, setQuery] = useState("")
+
+  const [tab, setTab] = useState("For you")
+
+  const [saved, setSaved] = useState<number[]>([])
+
+  const [showSaved, setShowSaved] = useState(false)
+
+  const [cartOpen, setCartOpen] = useState(false)
+
+  const [selected, setSelected] = useState<Product | null>(null)
+
+  const [notice, setNotice] = useState("")
+
+  const [seconds, setSeconds] = useState(3 * 3600 + 42 * 60 + 18)
+
+  const [banner, setBanner] = useState(0)
+
+  const cart = useCart()
+
   useEffect(() => {
-    const id = setInterval(() => setSeconds((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(id);
-  }, []);
+    const id = setInterval(() => setSeconds((s) => Math.max(0, s - 1)), 1000)
+
+    return () => clearInterval(id)
+  }, [])
+
   useEffect(() => {
     if (notice) {
-      const id = setTimeout(() => setNotice(""), 3500);
-      return () => clearTimeout(id);
+      const id = setTimeout(() => setNotice(""), 3500)
+
+      return () => clearTimeout(id)
     }
-  }, [notice]);
+  }, [notice])
+
   const filtered = products.filter(
     (p) =>
       (category === "For you" || p.category === category) &&
       p.name.toLowerCase().includes(query.toLowerCase()) &&
       (!showSaved || saved.includes(p.id)),
-  );
+  )
+
   const recommended =
     tab === "Best sellers"
-      ? [...filtered].sort((a, b) => Number.parseFloat(b.sold) - Number.parseFloat(a.sold))
+      ? [...filtered].sort(
+          (a, b) => Number.parseFloat(b.sold) - Number.parseFloat(a.sold),
+        )
       : tab === "Under Rp100k"
         ? filtered.filter((p) => p.price < 100000)
         : tab === "New arrivals"
           ? [...filtered].reverse()
-          : filtered;
+          : filtered
+
   function toggleSaved(id: number) {
-    setSaved((s) => (s.includes(id) ? s.filter((i) => i !== id) : [...s, id]));
+    setSaved((s) => (s.includes(id) ? s.filter((i) => i !== id) : [...s, id]))
   }
+
   function addToCart(p: Product) {
-    cart.add(p);
-    setNotice(`${p.name.split(" — ")[0]} added to your cart`);
+    cart.add(p)
+
+    setNotice(`${p.name.split(" — ")[0]} added to your cart`)
   }
+
   function navigate(next: ServicePage) {
-    setPage(next);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setPage(next)
+
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
+
   function openShopSection(id: string) {
-    setPage("shop");
+    setPage("shop")
+
     requestAnimationFrame(() =>
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }),
-    );
+    )
   }
+
   const card = (p: Product, flash = false) => (
     <article className="product-card" key={p.id}>
       <div className="product-image" onClick={() => setSelected(p)}>
         <img src={p.image} alt={p.name} loading="lazy" />
         {flash && (
-          <span className="discount">{Math.round((1 - p.price / p.original) * 100)}% OFF</span>
+          <span className="discount">
+            {Math.round((1 - p.price / p.original) * 100)}% OFF
+          </span>
         )}
         <button
           className={`save-button ${saved.includes(p.id) ? "saved" : ""}`}
           aria-label={`Save ${p.name}`}
           onClick={(e) => {
-            e.stopPropagation();
-            toggleSaved(p.id);
+            e.stopPropagation()
+
+            toggleSaved(p.id)
           }}
         >
           <Icon name="heart" size={17} />
@@ -79,15 +114,20 @@ export default function App() {
         <button
           className="quick-add"
           onClick={(e) => {
-            e.stopPropagation();
-            addToCart(p);
+            e.stopPropagation()
+
+            addToCart(p)
           }}
         >
           <Icon name="plus" size={16} /> Add to cart
         </button>
       </div>
       <div className="product-info">
-        <span className={`store-label ${p.tag === "Best seller" ? "bestseller" : ""}`}>
+        <span
+          className={`store-label ${
+            p.tag === "Best seller" ? "bestseller" : ""
+          }`}
+        >
           <Icon name={p.tag === "Best seller" ? "bolt" : "shield"} size={11} />
           {p.tag || "Verified seller"}
         </span>
@@ -119,7 +159,8 @@ export default function App() {
         )}
       </div>
     </article>
-  );
+  )
+
   return (
     <div className="app">
       <div className="utility-bar">
@@ -131,15 +172,21 @@ export default function App() {
           <span>Your everyday finds, a little better.</span>
         </div>
         <div>
-          <button onClick={() => setNotice("Seller onboarding is coming soon.")}>
+          <button
+            onClick={() => setNotice("Seller onboarding is coming soon.")}
+          >
             Become a seller
           </button>
-          <button onClick={() => setNotice("Need help? Contact hello@pasar.example")}>
+          <button
+            onClick={() => setNotice("Need help? Contact hello@pasar.example")}
+          >
             Help center
           </button>
           <button
             onClick={() =>
-              setNotice("Language is set to English. Prices are in Indonesian rupiah.")
+              setNotice(
+                "Language is set to English. Prices are in Indonesian rupiah.",
+              )
             }
           >
             English <Icon name="down" size={12} />
@@ -151,10 +198,13 @@ export default function App() {
           className="logo"
           href="#"
           onClick={() => {
-            navigate("shop");
-            setCategory("For you");
-            setQuery("");
-            setShowSaved(false);
+            navigate("shop")
+
+            setCategory("For you")
+
+            setQuery("")
+
+            setShowSaved(false)
           }}
         >
           pasar<span>.</span>
@@ -169,23 +219,33 @@ export default function App() {
               aria-label="Search products"
               value={query}
               onChange={(e) => {
-                setPage("shop");
-                setQuery(e.target.value);
+                setPage("shop")
+
+                setQuery(e.target.value)
               }}
               placeholder="Search for anything you love..."
             />
             <kbd>/</kbd>
-            <button aria-label="Search" onClick={() => openShopSection("discover")}>
+            <button
+              aria-label="Search"
+              onClick={() => openShopSection("discover")}
+            >
               <Icon name="search" size={19} />
             </button>
           </div>
           <div className="trending-searches">
             <span>Trending:</span>
-            {["Wireless earbuds", "Running shoes", "Skincare", "Home essentials"].map((term) => (
+            {[
+              "Wireless earbuds",
+              "Running shoes",
+              "Skincare",
+              "Home essentials",
+            ].map((term) => (
               <button
                 key={term}
                 onClick={() => {
-                  setPage("shop");
+                  setPage("shop")
+
                   setQuery(
                     term === "Wireless earbuds"
                       ? "Wireless"
@@ -194,7 +254,7 @@ export default function App() {
                         : term === "Home essentials"
                           ? "Ceramic"
                           : "Running",
-                  );
+                  )
                 }}
               >
                 {term}
@@ -207,9 +267,11 @@ export default function App() {
             className={showSaved ? "active" : ""}
             aria-label="Saved products"
             onClick={() => {
-              navigate("shop");
-              setShowSaved(!showSaved);
-              setCategory("For you");
+              navigate("shop")
+
+              setShowSaved(!showSaved)
+
+              setCategory("For you")
             }}
           >
             <Icon name="heart" size={23} />
@@ -217,7 +279,9 @@ export default function App() {
           </button>
           <button
             aria-label="Notifications"
-            onClick={() => setNotice("You're all caught up. New deals arrive every day!")}
+            onClick={() =>
+              setNotice("You're all caught up. New deals arrive every day!")
+            }
           >
             <Icon name="bell" size={23} />
             <i />
@@ -238,25 +302,28 @@ export default function App() {
       </header>
       <nav className="service-navigation" aria-label="Marketplace sections">
         <div>
-          {(
-            [
-              { id: "shop", label: "Discover", icon: "grid" },
-              { id: "products", label: "Products", icon: "bag" },
-              { id: "orders", label: "My orders", icon: "truck" },
-              { id: "user", label: "My account", icon: "shield" },
-            ] as const
-          ).map((item) => (
-            <button
-              key={item.id}
-              className={page === item.id ? "active" : ""}
-              aria-current={page === item.id ? "page" : undefined}
-              onClick={() => navigate(item.id)}
-            >
-              <Icon name={item.icon} size={17} />
-              {item.label}
-              {item.id === "orders" && <span>4</span>}
-            </button>
-          ))}
+          {([
+            { id: "shop", label: "Discover", icon: "grid" },
+
+            { id: "products", label: "Products", icon: "bag" },
+
+            { id: "orders", label: "My orders", icon: "truck" },
+
+            { id: "user", label: "My account", icon: "shield" },
+          ] as const)
+
+            .map((item) => (
+              <button
+                key={item.id}
+                className={page === item.id ? "active" : ""}
+                aria-current={page === item.id ? "page" : undefined}
+                onClick={() => navigate(item.id)}
+              >
+                <Icon name={item.icon} size={17} />
+                {item.label}
+                {item.id === "orders" && <span>4</span>}
+              </button>
+            ))}
         </div>
         <span>Your everyday, connected.</span>
       </nav>
@@ -286,10 +353,13 @@ export default function App() {
                 key={c.name}
                 className={category === c.name && !showSaved ? "selected" : ""}
                 onClick={() => {
-                  navigate("shop");
-                  setCategory(c.name);
-                  setShowSaved(false);
-                  setQuery("");
+                  navigate("shop")
+
+                  setCategory(c.name)
+
+                  setShowSaved(false)
+
+                  setQuery("")
                 }}
               >
                 <Icon name={c.icon} size={20} />
@@ -307,8 +377,9 @@ export default function App() {
             </button>
             <button
               onClick={() => {
-                setTab("Best sellers");
-                openShopSection("discover");
+                setTab("Best sellers")
+
+                openShopSection("discover")
               }}
             >
               <Icon name="shield" />
@@ -317,7 +388,9 @@ export default function App() {
             </button>
             <button
               onClick={() =>
-                setNotice("Use code HELLOPASAR for 10% off your first order. Demo offer only.")
+                setNotice(
+                  "Use code HELLOPASAR for 10% off your first order. Demo offer only.",
+                )
               }
             >
               <Icon name="gift" />
@@ -350,7 +423,9 @@ export default function App() {
           </div>
           <button
             className="need-help"
-            onClick={() => setNotice("We're here to help. Contact hello@pasar.example")}
+            onClick={() =>
+              setNotice("We're here to help. Contact hello@pasar.example")
+            }
           >
             <Icon name="help" size={18} />
             Need a little help?
@@ -370,7 +445,11 @@ export default function App() {
             <div className="breadcrumb">
               Home <Icon name="chevron" size={12} />
               <span>
-                {showSaved ? "Your saved finds" : category === "For you" ? "Discover" : category}
+                {showSaved
+                  ? "Your saved finds"
+                  : category === "For you"
+                    ? "Discover"
+                    : category}
               </span>
               <span className="welcome">A little something for everyone.</span>
             </div>
@@ -408,8 +487,9 @@ export default function App() {
                   </p>
                   <button
                     onClick={() => {
-                      setCategory("Electronics");
-                      openShopSection("discover");
+                      setCategory("Electronics")
+
+                      openShopSection("discover")
                     }}
                   >
                     Explore the collection <Icon name="arrow" size={17} />
@@ -439,7 +519,9 @@ export default function App() {
                       Up to <b>50% off</b>
                     </strong>
                   </div>
-                  <span className="hero-footnote">A sound decision, if you ask us.</span>
+                  <span className="hero-footnote">
+                    A sound decision, if you ask us.
+                  </span>
                 </div>
               </div>
               <div className="side-promos">
@@ -476,8 +558,11 @@ export default function App() {
                     <p>Enjoy 10% off your first order.</p>
                     <button
                       onClick={() => {
-                        navigator.clipboard?.writeText("HELLOPASAR");
-                        setNotice("Welcome code HELLOPASAR copied. Demo offer only.");
+                        navigator.clipboard?.writeText("HELLOPASAR")
+
+                        setNotice(
+                          "Welcome code HELLOPASAR copied. Demo offer only.",
+                        )
                       }}
                     >
                       Get my voucher <Icon name="arrow" size={14} />
@@ -491,22 +576,33 @@ export default function App() {
               {[
                 {
                   icon: "shield",
+
                   title: "100% authentic",
+
                   text: "Real brands. Real peace of mind.",
                 },
+
                 {
                   icon: "truck",
+
                   title: "Free delivery",
+
                   text: "More joy, less shipping fees.",
                 },
+
                 {
                   icon: "bag",
+
                   title: "Shop with confidence",
+
                   text: "Secure payments, always.",
                 },
+
                 {
                   icon: "headphones",
+
                   title: "Here for you",
+
                   text: "A little help, whenever you need.",
                 },
               ].map((item) => (
@@ -530,8 +626,9 @@ export default function App() {
                 <button
                   className="text-link"
                   onClick={() => {
-                    setCategory("For you");
-                    openShopSection("discover");
+                    setCategory("For you")
+
+                    openShopSection("discover")
                   }}
                 >
                   View all categories <Icon name="arrow" size={16} />
@@ -539,15 +636,22 @@ export default function App() {
               </div>
               <div className="category-grid">
                 {categories
+
                   .slice(1)
+
                   .concat([{ name: "More categories", icon: "grid" }])
+
                   .map((c, i) => (
                     <button
                       key={c.name}
                       onClick={() => {
-                        setCategory(c.name === "More categories" ? "For you" : c.name);
-                        setShowSaved(false);
-                        openShopSection("discover");
+                        setCategory(
+                          c.name === "More categories" ? "For you" : c.name,
+                        )
+
+                        setShowSaved(false)
+
+                        openShopSection("discover")
                       }}
                     >
                       <span className={`category-icon category-color-${i}`}>
@@ -570,7 +674,11 @@ export default function App() {
                   </div>
                   <div className="countdown">
                     <span>Ends in</span>
-                    {[Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(
+                    {[
+                      Math.floor(seconds / 3600),
+                      Math.floor(seconds / 60) % 60,
+                      seconds % 60,
+                    ].map(
                       (n, i) => (
                         <span className="time-part" key={i}>
                           <b>{String(n).padStart(2, "0")}</b>
@@ -583,8 +691,9 @@ export default function App() {
                 <button
                   className="text-link"
                   onClick={() => {
-                    setTab("Best sellers");
-                    openShopSection("discover");
+                    setTab("Best sellers")
+
+                    openShopSection("discover")
                   }}
                 >
                   All flash deals <Icon name="arrow" size={16} />
@@ -617,13 +726,24 @@ export default function App() {
                 </span>
               </div>
               <div className="tabs">
-                {["For you", "Best sellers", "New arrivals", "Under Rp100k"].map((t) => (
-                  <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+                {[
+                  "For you",
+                  "Best sellers",
+                  "New arrivals",
+                  "Under Rp100k",
+                ].map((t) => (
+                  <button
+                    key={t}
+                    className={tab === t ? "active" : ""}
+                    onClick={() => setTab(t)}
+                  >
                     {t}
                   </button>
                 ))}
               </div>
-              <div className="product-grid">{recommended.map((p) => card(p))}</div>
+              <div className="product-grid">
+                {recommended.map((p) => card(p))}
+              </div>
               {recommended.length === 0 && (
                 <div className="empty-state">
                   <Icon name="search" size={35} />
@@ -631,10 +751,13 @@ export default function App() {
                   <p>Try a different search or explore another category.</p>
                   <button
                     onClick={() => {
-                      setQuery("");
-                      setCategory("For you");
-                      setTab("For you");
-                      setShowSaved(false);
+                      setQuery("")
+
+                      setCategory("For you")
+
+                      setTab("For you")
+
+                      setShowSaved(false)
                     }}
                   >
                     Explore all products
@@ -668,7 +791,10 @@ export default function App() {
               <h2>
                 Your happy little cart <span>({cart.count})</span>
               </h2>
-              <button aria-label="Close cart" onClick={() => setCartOpen(false)}>
+              <button
+                aria-label="Close cart"
+                onClick={() => setCartOpen(false)}
+              >
                 <Icon name="close" />
               </button>
             </div>
@@ -677,7 +803,9 @@ export default function App() {
                 <Icon name="cart" size={44} />
                 <h3>Good finds are waiting.</h3>
                 <p>Your cart is empty. Let's change that.</p>
-                <button onClick={() => setCartOpen(false)}>Keep exploring</button>
+                <button onClick={() => setCartOpen(false)}>
+                  Keep exploring
+                </button>
               </div>
             ) : (
               <>
@@ -734,8 +862,14 @@ export default function App() {
         </div>
       )}
       {selected && (
-        <div className="overlay product-overlay" onClick={() => setSelected(null)}>
-          <section className="detail-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="overlay product-overlay"
+          onClick={() => setSelected(null)}
+        >
+          <section
+            className="detail-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className="modal-close"
               aria-label="Close product"
@@ -756,11 +890,13 @@ export default function App() {
                 <span className="separator">|</span>
                 {selected.sold} sold
               </div>
-              <strong className="detail-price">{currency(selected.price)}</strong>
+              <strong className="detail-price">
+                {currency(selected.price)}
+              </strong>
               <del>{currency(selected.original)}</del>
               <p>
-                A good find for your everyday. Quality you can count on, from a seller you can
-                trust.
+                A good find for your everyday. Quality you can count on, from a
+                seller you can trust.
               </p>
               <div className="detail-perks">
                 <span>
@@ -772,11 +908,17 @@ export default function App() {
                   Authenticity guaranteed
                 </span>
               </div>
-              <button className="primary-button" onClick={() => addToCart(selected)}>
+              <button
+                className="primary-button"
+                onClick={() => addToCart(selected)}
+              >
                 <Icon name="cart" size={19} />
                 Add to cart
               </button>
-              <button className="detail-save" onClick={() => toggleSaved(selected.id)}>
+              <button
+                className="detail-save"
+                onClick={() => toggleSaved(selected.id)}
+              >
                 <Icon name="heart" size={18} />
                 {saved.includes(selected.id)
                   ? "Saved to your favorites"
@@ -787,5 +929,5 @@ export default function App() {
         </div>
       )}
     </div>
-  );
+  )
 }
