@@ -3,7 +3,7 @@ import { Product } from "@/services/type"
 import { useState } from "react"
 
 export default function useCart() {
-  const [items, setItems] = useState<{ product: Product quantity: number }[]>(
+  const [items, setItems] = useState<{ product: Product, quantity: number }[]>(
     [],
   )
 

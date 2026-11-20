@@ -678,14 +678,12 @@ export default function App() {
                       Math.floor(seconds / 3600),
                       Math.floor(seconds / 60) % 60,
                       seconds % 60,
-                    ].map(
-                      (n, i) => (
-                        <span className="time-part" key={i}>
-                          <b>{String(n).padStart(2, "0")}</b>
-                          {i < 2 && <i>:</i>}
-                        </span>
-                      ),
-                    )}
+                    ].map((n, i) => (
+                      <span className="time-part" key={i}>
+                        <b>{String(n).padStart(2, "0")}</b>
+                        {i < 2 && <i>:</i>}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <button

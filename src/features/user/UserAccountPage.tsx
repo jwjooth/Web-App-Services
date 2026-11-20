@@ -12,7 +12,7 @@ type Props = {
 
 type UserTab = "Personal details" | "Delivery addresses" | "Preferences"
 
-const TABS: { name: UserTab icon: "bag" | "pin" | "bell" }[] = [
+const TABS: { name: UserTab, icon: "bag" | "pin" | "bell" }[] = [
   { name: "Personal details", icon: "bag" },
 
   { name: "Delivery addresses", icon: "pin" },
