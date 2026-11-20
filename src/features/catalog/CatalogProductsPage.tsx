@@ -1,23 +1,32 @@
 import { useState } from "react"
+
 import Icon from "@/components/Icon"
+
 import { categories, currency, products } from "./catalog"
+
 import type { Product } from "@/services/type"
 
 type Props = {
   onProduct: (product: Product) => void
+
   onAdd: (product: Product) => void
 }
 
 export default function CatalogProductsPage({ onProduct, onAdd }: Props) {
   const [productSearch, setProductSearch] = useState("")
+
   const [category, setCategory] = useState("All categories")
+
   const [sort, setSort] = useState("Featured")
+
   const catalog = products
+
     .filter(
       (p) =>
         p.name.toLowerCase().includes(productSearch.toLowerCase()) &&
         (category === "All categories" || p.category === category),
     )
+
     .sort((a, b) =>
       sort === "Price: low to high"
         ? a.price - b.price

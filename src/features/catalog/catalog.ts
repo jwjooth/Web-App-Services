@@ -5,10 +5,15 @@ const photo = (id: string) =>
 
 export function useProducts(
   products: Product[],
+
   category: string,
+
   query: string,
+
   showSaved: boolean,
+
   saved: number[],
+
   tab: string,
 ) {
   const filtered = products.filter(
@@ -34,32 +39,50 @@ export function useProducts(
 
 export const categories = [
   { name: "For you", icon: "grid" },
+
   { name: "Electronics", icon: "laptop" },
+
   { name: "Fashion", icon: "shirt" },
+
   { name: "Home & Living", icon: "home" },
+
   { name: "Beauty & Care", icon: "beauty" },
+
   { name: "Sports & Outdoor", icon: "sport" },
+
   { name: "Food & Groceries", icon: "bag" },
+
   { name: "Toys & Hobbies", icon: "gift" },
 ]
 
 export const products: Product[] = [
   {
     id: 1,
+
     name: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
+
     price: 3499000,
+
     original: 4999000,
+
     image: photo("photo-1546435770-a3e426bf472b"),
+
     category: "Electronics",
+
     rating: "4.9",
+
     sold: "1.2k",
+
     city: "Jakarta Selatan",
+
     tag: "Official store",
   },
 
   {
     id: 2,
+
     name: "Nike Air Max 270 Everyday Comfort Sneakers",
+
     price: 1299000,
 
     original: 1899000,

@@ -1,26 +1,37 @@
 import Icon from "@/components/Icon"
+
 import { currency } from "../catalog/catalog"
+
 import { Order } from "@/services/type"
 
 type Props = {
   order: Order
+
   onClose: () => void
 }
 
 const TIMELINE_STEPS = [
   "Order placed",
+
   "Payment confirmed",
+
   "Preparing your parcel",
+
   "On the way",
+
   "Delivered",
 ] as const
 
 export default function OrderTrackingModal({ order, onClose }: Props) {
   const currentStep = {
     "To pay": 0,
+
     Processing: 2,
+
     "In transit": 3,
+
     Delivered: 4,
+
     Cancelled: -1,
   }[order.status]
 

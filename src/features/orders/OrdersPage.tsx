@@ -1,28 +1,42 @@
 import { useState } from "react"
+
 import Icon from "@/components/Icon"
+
 import { currency } from "../catalog/catalog"
+
 import { demoOrders } from "./orders"
+
 import OrderTrackingModal from "./OrderTrackingModal"
+
 import type { Order, OrderStatus, Product } from "@/services/type"
 
 type Props = {
   onProduct: (product: Product) => void
+
   onAdd: (product: Product) => void
+
   notify: (message: string) => void
 }
 
 const ORDER_STATUSES: OrderStatus[] = [
   "To pay",
+
   "Processing",
+
   "In transit",
+
   "Delivered",
+
   "Cancelled",
 ]
 
 export default function OrdersPage({ onProduct, onAdd, notify }: Props) {
   const [orders, setOrders] = useState<Order[]>(demoOrders)
+
   const [orderFilter, setOrderFilter] = useState("All orders")
+
   const [search, setSearch] = useState("")
+
   const [tracking, setTracking] = useState<Order | null>(null)
 
   const visibleOrders = orders.filter(
@@ -33,21 +47,28 @@ export default function OrdersPage({ onProduct, onAdd, notify }: Props) {
 
   const stats = [
     { label: "All orders", value: orders.length, icon: "bag" },
+
     {
       label: "On their way",
+
       value: orders.filter((o) => o.status === "In transit").length,
+
       icon: "truck",
     },
 
     {
       label: "To pay",
+
       value: orders.filter((o) => o.status === "To pay").length,
+
       icon: "cart",
     },
 
     {
       label: "Delivered",
+
       value: orders.filter((o) => o.status === "Delivered").length,
+
       icon: "shield",
     },
   ]

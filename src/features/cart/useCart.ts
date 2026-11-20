@@ -1,12 +1,15 @@
 import { Product } from "@/services/type"
+
 import { useEffect, useState } from "react"
 
 export default function useCart() {
   const [items, setItems] = useState<{
     product: Product
+
     quantity: number
   }[]>(() => {
     const saved = localStorage.getItem("pasar-cart")
+
     return saved ? JSON.parse(saved) : []
   })
 
@@ -51,6 +54,7 @@ export default function useCart() {
 
     total: items.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
+
       0,
     ),
   }
