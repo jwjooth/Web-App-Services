@@ -2,7 +2,7 @@ import Icon from "@/components/Icon"
 
 import { currency } from "../catalog/catalog"
 
-import type { Order } from "./orders"
+import { Order } from "@/services/type"
 
 type Props = {
   order: Order

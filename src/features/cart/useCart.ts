@@ -1,20 +1,30 @@
 import { Product } from "@/services/type"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function useCart() {
-  const [items, setItems] = useState<{ product: Product, quantity: number }[]>(
-    [],
-  )
+  const [items, setItems] = useState<{
+    product: Product
+
+    quantity: number
+  }[]>(() => {
+    const saved = localStorage.getItem("pasar-cart")
+
+    return saved ? JSON.parse(saved) : []
+  })
+
+  useEffect(() => {
+    localStorage.setItem("pasar-cart", JSON.stringify(items))
+  }, [items])
 
   function add(product: Product) {
     setItems((current) =>
       current.some((item) => item.product.id === product.id)
         ? current.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        )
+            item.product.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          )
         : [...current, { product, quantity: 1 }],
     )
   }
@@ -44,6 +54,7 @@ export default function useCart() {
 
     total: items.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
+
       0,
     ),
   }

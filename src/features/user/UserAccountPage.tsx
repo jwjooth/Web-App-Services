@@ -2,7 +2,9 @@ import { useState } from "react"
 
 import Icon from "@/components/Icon"
 
-import { demoAddresses, demoUser, type Address, type UserProfile } from "./user"
+import { demoAddresses, demoUser } from "./user"
+
+import { Address, UserProfile } from "@/services/type"
 
 import AddressModal from "./AddressModal"
 
@@ -12,7 +14,11 @@ type Props = {
 
 type UserTab = "Personal details" | "Delivery addresses" | "Preferences"
 
-const TABS: { name: UserTab, icon: "bag" | "pin" | "bell" }[] = [
+const TABS: {
+  name: UserTab
+
+  icon: "bag" | "pin" | "bell"
+}[] = [
   { name: "Personal details", icon: "bag" },
 
   { name: "Delivery addresses", icon: "pin" },

@@ -54,8 +54,11 @@ const PAGE_METADATA: Record<Exclude<ServicePage, "shop">, {
 
 export default function ServicePages({
   page,
+
   onProduct,
+
   onAdd,
+
   notify,
 }: Props) {
   const meta = PAGE_METADATA[page]

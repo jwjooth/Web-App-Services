@@ -3,6 +3,40 @@ import { Product } from "@/services/type"
 const photo = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=85`
 
+export function useProducts(
+  products: Product[],
+
+  category: string,
+
+  query: string,
+
+  showSaved: boolean,
+
+  saved: number[],
+
+  tab: string,
+) {
+  const filtered = products.filter(
+    (p) =>
+      (category === "For you" || p.category === category) &&
+      p.name.toLowerCase().includes(query.toLowerCase()) &&
+      (!showSaved || saved.includes(p.id)),
+  )
+
+  const recommended =
+    tab === "Best sellers"
+      ? [...filtered].sort(
+          (a, b) => Number.parseFloat(b.sold) - Number.parseFloat(a.sold),
+        )
+      : tab === "Under Rp100k"
+        ? filtered.filter((p) => p.price < 100000)
+        : tab === "New arrivals"
+          ? [...filtered].reverse()
+          : filtered
+
+  return recommended
+}
+
 export const categories = [
   { name: "For you", icon: "grid" },
 

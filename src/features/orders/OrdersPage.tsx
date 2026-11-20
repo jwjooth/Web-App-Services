@@ -4,11 +4,11 @@ import Icon from "@/components/Icon"
 
 import { currency } from "../catalog/catalog"
 
-import { demoOrders, type Order, type OrderStatus } from "./orders"
+import { demoOrders } from "./orders"
 
 import OrderTrackingModal from "./OrderTrackingModal"
 
-import type { Product } from "@/services/type"
+import type { Order, OrderStatus, Product } from "@/services/type"
 
 type Props = {
   onProduct: (product: Product) => void

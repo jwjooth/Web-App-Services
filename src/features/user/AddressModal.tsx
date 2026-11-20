@@ -1,6 +1,6 @@
 import Icon from "@/components/Icon"
 
-import type { Address } from "./user"
+import { Address } from "@/services/type"
 
 type Props = {
   draft: Address
@@ -26,8 +26,11 @@ const ADDRESS_FIELDS = [
 
 export default function AddressModal({
   draft,
+
   onChange,
+
   onSave,
+
   onClose,
 }: Props) {
   return (

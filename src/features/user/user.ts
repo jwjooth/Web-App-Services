@@ -1,26 +1,4 @@
-export type UserProfile = {
-  name: string
-
-  email: string
-
-  phone: string
-
-  birthday: string
-}
-
-export type Address = {
-  id: number
-
-  label: string
-
-  recipient: string
-
-  street: string
-
-  city: string
-
-  postal: string
-}
+import { UserProfile, Address } from "@/services/type"
 
 export const demoUser: UserProfile = {
   name: "Alex Morgan",
